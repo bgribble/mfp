@@ -53,6 +53,7 @@ info_cb (const char * msg)
     return;
 }
 
+
 static int
 reorder_cb (void * ctxt_arg)
 {
@@ -96,6 +97,41 @@ reorder_cb (void * ctxt_arg)
 
     return 0;
 }
+
+
+int
+mfp_jack_connect_defaults(
+    mfp_context * ctxt, const char * playback_regex, const char * record_regex
+) {
+    // find system inputs and outputs and connect to
+    // context inputs and outputs
+    const char ** sys_playback = jack_get_ports(
+        ctxt->info.jack->client,
+        playback_regex,
+        JACK_DEFAULT_AUDIO_TYPE,
+        JackPortIsInput | JackPortIsPhysical
+    );
+    int num_inports = mfp_num_input_buffers(ctxt);
+    int num_outports = mfp_num_output_buffers(ctxt);
+
+    if (sys_playback[0] != NULL && (num_outports > 0)) {
+        jack_connect(
+            ctxt->info.jack->client,
+            jack_port_name(g_array_index(ctxt->info.jack->output_ports, jack_port_t *, 0)),
+            sys_playback[0]
+        );
+        if (sys_playback[1] != NULL && (num_outports > 1)) {
+            jack_connect(
+                ctxt->info.jack->client,
+                jack_port_name(g_array_index(ctxt->info.jack->output_ports, jack_port_t *, 1)),
+                sys_playback[1]
+            );
+        }
+    }
+
+    jack_free(sys_playback);
+}
+
 
 mfp_context *
 mfp_jack_startup(char * client_name, int num_inputs, int num_outputs)
@@ -184,6 +220,7 @@ mfp_jack_shutdown(void)
     }
     mfp_log_debug("jack_shutdown: done closing clients\n");
 }
+
 
 void *
 test_SETUP(void)

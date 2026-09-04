@@ -183,6 +183,8 @@ async def main():
                         help="Do not restart DSP engine if it crashes")
     parser.add_argument("--no-onload", action="store_true",
                         help="Do not run onload/loadbang functions")
+    parser.add_argument("--no-default-audio", action="store_true",
+                        help="Do not connect to system (hardware) playback ports")
     parser.add_argument("--help-builtins", action="store_true",
                         help="Display help on builtin objects and exit")
     parser.add_argument("--help-bindings", action="store_true",
@@ -229,6 +231,7 @@ async def main():
     app.max_blocksize = args.get("max_bufsize")
     app.socket_path = args.get("socket_path")
     app.debug = args.get("debug")
+    app.connect_defaults = not args.get("no_default_audio")
 
     log.log_thread = threading.get_ident()
     log.log_loop = asyncio.get_event_loop()

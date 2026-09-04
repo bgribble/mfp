@@ -105,6 +105,18 @@ mfp_context_default_io(mfp_context * context, int patch_id)
 }
 
 
+int mfp_context_connect_defaults(
+    mfp_context * context, const char * playback_regex, const char * record_regex
+) {
+    if (context->ctype == CTYPE_JACK) {
+        return mfp_jack_connect_defaults(context, playback_regex, record_regex);
+    }
+    else {
+        return -1;
+    }
+
+}
+
 void
 mfp_context_update_usage(mfp_context * context, struct timeval * start, struct timeval * end) {
     double elapsed_usec = (

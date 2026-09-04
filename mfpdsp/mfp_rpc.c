@@ -441,6 +441,11 @@ dispatch_methodcall(
         rd.context_id = context_id;
         mfp_dsp_push_request(rd);
     }
+    else if (!strcmp(service_name, "DSPObject.connect_default_io")) {
+        const int ctxt_id = args->items[0]->_int;
+        mfp_context * ctxt = (mfp_context *)g_hash_table_lookup(mfp_contexts, GINT_TO_POINTER(ctxt_id));
+        mfp_context_connect_defaults(ctxt, NULL, NULL);
+    }
     else {
         mfp_log_debug("[method] unhandled method '%s'", service_name);
     }

@@ -277,6 +277,7 @@ extern void mfp_finish_all(void);
 /* mfp_jack.c */
 extern mfp_context * mfp_jack_startup(char * client_name, int num_inputs, int num_outputs);
 extern void mfp_jack_shutdown(void);
+extern int mfp_jack_connect_defaults(mfp_context *, const char *, const char *);
 extern mfp_sample * mfp_get_input_buffer(mfp_context *, int);
 extern mfp_sample * mfp_get_output_buffer(mfp_context *, int);
 extern int mfp_num_output_buffers(mfp_context * ctxt);
@@ -386,6 +387,9 @@ extern int mfp_context_init(mfp_context * context);
 extern void mfp_context_destroy(mfp_context * context);
 extern int mfp_context_default_io(mfp_context * context, int obj_id);
 extern void mfp_context_update_usage(mfp_context *, struct timeval *, struct timeval *);
+extern int mfp_context_connect_defaults(mfp_context *, const char *, const char *);
+
+
 /* mfp_api.c */
 extern void mfp_api_init(void);
 extern int mfp_api_open_context(mfp_context * ctxt, char *, int *);

@@ -69,6 +69,10 @@ class DSPObject:
         pass
 
     @classmethod
+    def connect_default_io(cls, context_id):
+        pass
+
+    @classmethod
     def freewheel(cls, patch_id, context_id, freewheel_frames):
         pass
 

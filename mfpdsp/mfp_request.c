@@ -153,13 +153,14 @@ mfp_dsp_handle_requests(mfp_context * context)
 
         case REQTYPE_USAGE:
             context = g_hash_table_lookup(mfp_contexts, GINT_TO_POINTER(cmd->context_id));
-            
+
             double dsp_load = 0;
             for (int i=0; i < CTXT_HISTORY_SIZE; i++) {
                 dsp_load += context->dsp_usage_history[i];
             }
             mfp_dsp_send_patch_response_float(cmd->src_proc, RESP_DSP_LOAD, dsp_load / CTXT_HISTORY_SIZE);
             break;
+
         }
         context->incoming_queue_read = (context->incoming_queue_read + 1) % REQ_BUFSIZE;
     }

@@ -42,6 +42,7 @@ class MFPApp (Singleton, SignalMixin):
         self.no_restart = False
         self.no_onload = False
         self.gui_backend = None
+        self.connect_defaults = False
         self.debug = False
         self.debug_remote = False
         self.osc_port = None
@@ -137,7 +138,7 @@ class MFPApp (Singleton, SignalMixin):
         await self.rpc_host.export(MFPCommand)
 
         # dsp and gui processes
-        await self.start_dsp()
+        await self.start_dsp(self.connect_defaults)
 
         if not self.no_gui:
             logstart = log.log_time_base.strftime("%Y-%m-%dT%H:%M:%S.%f")
@@ -251,7 +252,7 @@ class MFPApp (Singleton, SignalMixin):
         self.async_task(self.midi_mgr.run())
         log.debug("MIDI started (ALSA Sequencer)")
 
-    async def start_dsp(self):
+    async def start_dsp(self, connect_io=False):
         from .dsp_object import DSPObject, DSPContext
         if self.dsp_process is not None:
             log.debug("Terminating old DSP process...")
@@ -268,11 +269,14 @@ class MFPApp (Singleton, SignalMixin):
                 *dspcommand, log_module="dsp", log_raw=self.debug_remote
             )
             await self.dsp_process.start()
-            await self.rpc_host.require(DSPObject)
+            dsp_object_factory = await self.rpc_host.require(DSPObject)
             Patch.default_context = DSPContext.lookup(
                 self.rpc_host.services_remote["DSPObject"][0], 0
             )
             log.debug(f"DSP backend started, context={Patch.default_context}")
+            if connect_io:
+                await dsp_object_factory.connect_default_io(Patch.default_context.context_id)
+                log.debug("2 outputs connected to system audio IO")
 
     def remember(self, obj):
         oi = self.next_obj_id
@@ -328,7 +332,7 @@ class MFPApp (Singleton, SignalMixin):
                 return
 
             # delete and restart dsp backend
-            await self.start_dsp()
+            await self.start_dsp(self.connect_defaults)
             log.debug(f"relaunch: {len(patch_json)} patches to recreate")
 
             # recreate patches
@@ -706,7 +710,7 @@ class MFPApp (Singleton, SignalMixin):
         self.extpath = utils.prepend_path(session_path, self.extpath)
 
         self.no_restart = True
-        await self.start_dsp()
+        await self.start_dsp(self.connect_defaults)
         self.start_midi()
         for p in patches:
             await self.open_file(p)
