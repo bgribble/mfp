@@ -276,7 +276,7 @@ class MFPApp (Singleton, SignalMixin):
             log.debug(f"DSP backend started, context={Patch.default_context}")
             if connect_io:
                 await dsp_object_factory.connect_default_io(Patch.default_context.context_id)
-                log.debug("2 outputs connected to system audio IO")
+                log.debug("Inputs and outputs connected to system audio IO")
 
     def remember(self, obj):
         oi = self.next_obj_id

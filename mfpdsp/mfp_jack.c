@@ -105,22 +105,35 @@ mfp_jack_connect_defaults(
 ) {
     // find system inputs and outputs and connect to
     // context inputs and outputs
+    int num_inports = mfp_num_input_buffers(ctxt);
+    int num_outports = mfp_num_output_buffers(ctxt);
+
     const char ** sys_playback = jack_get_ports(
         ctxt->info.jack->client,
         playback_regex,
         JACK_DEFAULT_AUDIO_TYPE,
         JackPortIsInput | JackPortIsPhysical
     );
-    int num_inports = mfp_num_input_buffers(ctxt);
-    int num_outports = mfp_num_output_buffers(ctxt);
 
     if (sys_playback[0] != NULL && (num_outports > 0)) {
+        mfp_log_debug(
+            "[autoconnect] %s --> %s\n",
+            jack_port_name(g_array_index(ctxt->info.jack->output_ports, jack_port_t *, 0)),
+            sys_playback[0]
+        );
+
         jack_connect(
             ctxt->info.jack->client,
             jack_port_name(g_array_index(ctxt->info.jack->output_ports, jack_port_t *, 0)),
             sys_playback[0]
         );
         if (sys_playback[1] != NULL && (num_outports > 1)) {
+            mfp_log_debug(
+                "[autoconnect] %s --> %s\n",
+                jack_port_name(g_array_index(ctxt->info.jack->output_ports, jack_port_t *, 1)),
+                sys_playback[1]
+            );
+
             jack_connect(
                 ctxt->info.jack->client,
                 jack_port_name(g_array_index(ctxt->info.jack->output_ports, jack_port_t *, 1)),
@@ -130,6 +143,40 @@ mfp_jack_connect_defaults(
     }
 
     jack_free(sys_playback);
+
+    const char ** sys_record = jack_get_ports(
+        ctxt->info.jack->client,
+        record_regex,
+        JACK_DEFAULT_AUDIO_TYPE,
+        JackPortIsOutput | JackPortIsPhysical
+    );
+
+    if (sys_record[0] != NULL && (num_inports > 0)) {
+        mfp_log_debug(
+            "[autoconnect] %s --> %s\n",
+            sys_record[0],
+            jack_port_name(g_array_index(ctxt->info.jack->input_ports, jack_port_t *, 0))
+        );
+        jack_connect(
+            ctxt->info.jack->client,
+            sys_record[0],
+            jack_port_name(g_array_index(ctxt->info.jack->input_ports, jack_port_t *, 0))
+        );
+        if (sys_record[1] != NULL && (num_inports > 1)) {
+            mfp_log_debug(
+                "[autoconnect] %s --> %s\n",
+                sys_record[1],
+                jack_port_name(g_array_index(ctxt->info.jack->input_ports, jack_port_t *, 1))
+            );
+            jack_connect(
+                ctxt->info.jack->client,
+                sys_record[1],
+                jack_port_name(g_array_index(ctxt->info.jack->input_ports, jack_port_t *, 1))
+            );
+        }
+    }
+
+    jack_free(sys_record);
 }
 
 
