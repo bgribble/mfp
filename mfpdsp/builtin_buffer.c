@@ -193,7 +193,7 @@ process(mfp_processor * proc)
     builtin_buffer_data * d = (builtin_buffer_data *)(proc->data);
     int tocopy=0;
     mfp_block * trig_block = NULL;
-    mfp_sample * outptr, * inptr, * trigptr;
+    mfp_sample * outptr, * inptr, * trigptr = NULL;
     int inpos, outpos;
     int loopstart=0;
 
@@ -504,7 +504,6 @@ process(mfp_processor * proc)
                     d->buf_state = BUF_IDLE;
                     break;
             }
-            d->trig_message = 0;
 
             if (section_state != next_state) {
                 /* set up for the action we are going to take in the next phase */
@@ -513,6 +512,7 @@ process(mfp_processor * proc)
                 d->buf_state_start_pos = section_start + section_size;
             }
         }
+        d->trig_message = 0;
 
         /* phase 2 -- move data to/from buffer and input/output */
         if (

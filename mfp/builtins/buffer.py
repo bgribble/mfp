@@ -38,7 +38,7 @@ class Buffer(Processor):
 
     MODES = [
         ["Play to end", 5],
-        ["Play, using existing loop points", 6],
+        ["Play loop, using existing loop points", 6],
         ["Play, triggered by specified channel", 7],
         ["Record to end", 0],
         ["Record, setting loop points", 1],
