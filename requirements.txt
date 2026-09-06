@@ -9,7 +9,7 @@ imgui-bundle==1.92.801
 librosa==0.11.0
 munch==4.0.0
 numpy==2.2.4
-pillow==12.2.0
+pillow==12.3.0
 posix_ipc==1.1.1
 protobuf==6.33.5
 pycparser==2.22

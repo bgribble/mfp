@@ -16,7 +16,10 @@ THINGS TO KNOW
 OS platform: I have only tested MFP on 32-bit (raspi) and 64-bit
 Linux.
 
-python: MFP requires Python 3.x at this time.
+python: MFP requires Python 3.10 -- 3.13 at this time. Some
+dependencies won't build with 3.14 and newer. This might cause some
+problems if your system Python is 3.14; I recommend installing 3.13
+in a virtual environment that you make your default python3 when building.
 
 waf: MFP uses 'waf', which you can think of as a replacement for
 autotools and make.  You do not need to install waf; the correct
@@ -88,7 +91,7 @@ You'll get errors in the "./waf configure" process if these aren't installed. Th
 Github CI build installs the needed packages like so:
 
 ```
-sudo apt install gcc-14 libglib2.0-dev cmake libserd-dev \
+sudo apt install gcc-14 libglib2.0-dev cmake libserd-dev python3-dev \
 libjson-glib-dev libprotobuf-c-dev libjack-jackd2-dev liblo-dev \
 lv2-dev libasound2-dev ladspa-sdk faust faust-common libfaust2t64 llvm-dev \
 libllvmlibc-19-dev libpolly-18-dev libzstd-dev
@@ -143,6 +146,19 @@ Note that once you have installed MFP to a $prefix, there's some
 stuff hardcoded into the launcher so you can't just move the
 whole directory to another location. You will need to install
 again to the new location.
+
+As of September 2026, there are a few dependencies that are
+installed with mfp that need some special environment vars set
+when they are being locally compiled.  I haven't dug into exactly
+what is going on, just a little light googling to find a
+workaround. When installing from a completely clean slate (no cached
+wheels for dependencies) I need to do this:
+
+    $ CMAKE_POLICY_VERSION_MINIMUM=3.5 PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1 ./waf build install
+
+After the first successful install, those wheels will be cached and
+you can drop the environment vars.
+
 
 DESKTOP FILE
 --------------------------
