@@ -333,7 +333,7 @@ static const ProtobufCFieldDescriptor carp__python_value__field_descriptors[9] =
     offsetof(Carp__PythonValue, _string),
     NULL,
     &protobuf_c_empty_string,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -345,7 +345,7 @@ static const ProtobufCFieldDescriptor carp__python_value__field_descriptors[9] =
     offsetof(Carp__PythonValue, _double),
     NULL,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -357,7 +357,7 @@ static const ProtobufCFieldDescriptor carp__python_value__field_descriptors[9] =
     offsetof(Carp__PythonValue, _int),
     NULL,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -369,7 +369,7 @@ static const ProtobufCFieldDescriptor carp__python_value__field_descriptors[9] =
     offsetof(Carp__PythonValue, _bytes),
     NULL,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -381,7 +381,7 @@ static const ProtobufCFieldDescriptor carp__python_value__field_descriptors[9] =
     offsetof(Carp__PythonValue, _serialized),
     NULL,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -393,7 +393,7 @@ static const ProtobufCFieldDescriptor carp__python_value__field_descriptors[9] =
     offsetof(Carp__PythonValue, _bool),
     NULL,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -405,7 +405,7 @@ static const ProtobufCFieldDescriptor carp__python_value__field_descriptors[9] =
     offsetof(Carp__PythonValue, _none),
     NULL,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -417,7 +417,7 @@ static const ProtobufCFieldDescriptor carp__python_value__field_descriptors[9] =
     offsetof(Carp__PythonValue, _array),
     &carp__python_array__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
@@ -429,7 +429,7 @@ static const ProtobufCFieldDescriptor carp__python_value__field_descriptors[9] =
     offsetof(Carp__PythonValue, _dict),
     &carp__python_dict__descriptor,
     NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
 };
