@@ -8,6 +8,7 @@ import asyncio
 import inspect
 import os
 import os.path
+import sys
 import configparser
 import simplejson as json
 
@@ -148,7 +149,7 @@ class MFPApp (Singleton, SignalMixin):
                 "-l", logstart,
                 "-m", self.gui_init_magnification,
                 '--backend', self.gui_backend,
-                "--searchpath", self.searchpath
+                "--searchpath", sys.prefix,
             ]
             if self.debug:
                 guicmd.append('--debug')

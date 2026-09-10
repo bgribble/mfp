@@ -230,7 +230,7 @@ class BufferEditor:
             return
 
         fname = binfo.file_name or 'No file'
-        dots = image_utils.load_texture_from_file("icons/dots-horiz.png")
+        dots = image_utils.load_texture_from_file("icons/hicolor/36x36/dots-horiz.png")
 
         channel_ampls = [0] * (4 * self.buffer_info.channels)
         if self.working_ampl_buf_obj:

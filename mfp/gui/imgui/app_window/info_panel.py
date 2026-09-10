@@ -103,7 +103,7 @@ def render(app_window):
 
     ##############################
     ## resize grab bar
-    dots = image_utils.load_texture_from_file("icons/dots-vert.png")
+    dots = image_utils.load_texture_from_file("icons/hicolor/36x36/dots-vert.png")
     grab_size = 8 * app_window.imgui_global_scale
     imgui.push_style_color(
         imgui.Col_.child_bg,

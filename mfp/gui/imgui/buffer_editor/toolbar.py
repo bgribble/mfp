@@ -57,18 +57,18 @@ def render_toolbar(self):
     imgui.set_next_window_size((self.app_window.window_width, 2 * button_size))
     imgui.set_next_window_pos(imgui.get_window_pos())
 
-    play_tex = image_utils.load_texture_from_file("icons/playback-start.png")
-    pause_tex = image_utils.load_texture_from_file("icons/playback-pause.png")
-    stop_tex = image_utils.load_texture_from_file("icons/playback-stop.png")
-    home_tex = image_utils.load_texture_from_file("icons/rewind.png")
-    end_tex = image_utils.load_texture_from_file("icons/fast-forward.png")
-    record_tex = image_utils.load_texture_from_file("icons/record.png")
-    loop_tex = image_utils.load_texture_from_file("icons/playback-loop.png")
-    menu_tex = image_utils.load_texture_from_file("icons/open-menu.png")
-    zoom_in_tex = image_utils.load_texture_from_file("icons/zoom-in.png")
-    zoom_out_tex = image_utils.load_texture_from_file("icons/zoom-out.png")
-    zoom_fit_tex = image_utils.load_texture_from_file("icons/zoom-to-selection.png")
-    center_playhead_tex = image_utils.load_texture_from_file("icons/center-playhead.png")
+    play_tex = image_utils.load_texture_from_file("icons/hicolor/36x36/playback-start.png")
+    pause_tex = image_utils.load_texture_from_file("icons/hicolor/36x36/playback-pause.png")
+    stop_tex = image_utils.load_texture_from_file("icons/hicolor/36x36/playback-stop.png")
+    home_tex = image_utils.load_texture_from_file("icons/hicolor/36x36/rewind.png")
+    end_tex = image_utils.load_texture_from_file("icons/hicolor/36x36/fast-forward.png")
+    record_tex = image_utils.load_texture_from_file("icons/hicolor/36x36/record.png")
+    loop_tex = image_utils.load_texture_from_file("icons/hicolor/36x36/playback-loop.png")
+    menu_tex = image_utils.load_texture_from_file("icons/hicolor/36x36/open-menu.png")
+    zoom_in_tex = image_utils.load_texture_from_file("icons/hicolor/36x36/zoom-in.png")
+    zoom_out_tex = image_utils.load_texture_from_file("icons/hicolor/36x36/zoom-out.png")
+    zoom_fit_tex = image_utils.load_texture_from_file("icons/hicolor/36x36/zoom-to-selection.png")
+    center_playhead_tex = image_utils.load_texture_from_file("icons/hicolor/36x36/center-playhead.png")
 
     imgui.begin(
         "bufedit_toolbar",
@@ -177,9 +177,6 @@ def render_toolbar(self):
         imgui.pop_style_color(2)
     imgui.same_line()
 
-    if not self.implot_selection:
-        imgui.begin_disabled()
-
     need_pop = False
     if self.implot_playhead_looping:
         need_pop = True
@@ -197,9 +194,6 @@ def render_toolbar(self):
         imgui.pop_style_color(2)
 
     imgui.same_line()
-
-    if not self.implot_selection:
-        imgui.end_disabled()
 
     imgui.dummy((button_size, 1))
     imgui.same_line()

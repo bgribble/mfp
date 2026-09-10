@@ -65,10 +65,11 @@ def load_image_from_file(filename):
     loadpath = os.path.dirname(filename)
     loadfile = os.path.basename(filename)
 
-    searchpath = MFPGUI().searchpath + ((':' + loadpath) if loadpath else "")
+    searchpath = MFPGUI().searchpath
 
-    path = find_file_in_path(loadfile, searchpath)
+    path = find_file_in_path(filename, searchpath)
     if not path:
+        log.debug(f"load_image: can't find '{filename}' in {searchpath}")
         return None
 
     pil_image = Image.open(path).convert("RGBA")

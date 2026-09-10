@@ -8,9 +8,8 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 
 import argparse
 import asyncio
-
+import sys
 from datetime import datetime
-
 
 from carp.channel import UnixSocketChannel
 from carp.host import Host
@@ -212,7 +211,8 @@ async def main(cmdline):
     gui.mfp = mfp_connection
     gui.debug = debug
     gui.backend_name = backend
-    gui.searchpath = searchpath
+
+    gui.searchpath = f"{sys.prefix}/../:."
 
     gui.install_theme(theme)
 
