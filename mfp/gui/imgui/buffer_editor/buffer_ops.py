@@ -39,15 +39,15 @@ def buffer_grab(self, shm_obj=None, buffer_info=None):
     self.buffer_data = []
     self.spectral_data_cache = {}
 
-    self.channel_selections = [None] * (buffer_info.channels + 1)
-    self.channel_selections_active = [False] * (buffer_info.channels + 1)
+    self.channel_selections = [None] * buffer_info.channels
+    self.channel_selections_active = [False] * buffer_info.channels
     if len(self.channel_options) < buffer_info.channels:
         self.channel_options = (
             self.channel_options
             + [dict(fx=True) for _ in range(buffer_info.channels - len(self.channel_options))]
         )
     self.implot_limits = None
-    self.implot_limits_need_set = [None] * (buffer_info.channels + 1)
+    self.implot_limits_need_set = [None] * buffer_info.channels
 
     try:
         for c in range(buffer_info.channels):
@@ -107,7 +107,7 @@ def buffer_compute_peaks(self):
     self.implot_limits = implot.Rect(
         x_min=0, x_max=total_time, y_min=-1, y_max=1
     )
-    self.implot_limits_need_set = [True] * (self.buffer_info.channels + 1)
+    self.implot_limits_need_set = [True] * self.buffer_info.channels
     self.implot_limits_counter = 5
     self.buffer_peaks["1"] = (
         padded,

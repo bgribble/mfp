@@ -333,7 +333,7 @@ def render_toolbar(self):
 
     if units_changed or bpm_changed:
         num_channels = len(self.buffer_data or [])
-        self.implot_limits_need_set = [True] * (num_channels + 1)
+        self.implot_limits_need_set = [True] * num_channels
 
     imgui.pop_style_var()
     imgui.pop_font()

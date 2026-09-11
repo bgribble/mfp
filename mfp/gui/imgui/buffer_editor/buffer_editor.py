@@ -111,7 +111,7 @@ class BufferEditor:
             if self.implot_limits:
                 self.implot_limits.x.min *= ratio
                 self.implot_limits.x.max *= ratio
-                self.implot_limits_need_set = [True] * (self.buffer_info.channels + 1)
+                self.implot_limits_need_set = [True] * self.buffer_info.channels
             if self.implot_playhead:
                 self.implot_playhead *= ratio
             if self.implot_total_time:
@@ -128,7 +128,7 @@ class BufferEditor:
         if self.implot_limits:
             self.implot_limits.x.min -= delta
             self.implot_limits.x.max -= delta
-            self.implot_limits_need_set = [True] * (self.buffer_info.channels + 1)
+            self.implot_limits_need_set = [True] * self.buffer_info.channels
         if self.implot_playhead:
             self.implot_playhead = 0
 
@@ -161,7 +161,7 @@ class BufferEditor:
                 self.position_to_sample(self.implot_limits.x.max),
                 units=units, origin=origin
             )
-            self.implot_limits_need_set = [True] * (self.buffer_info.channels + 1)
+            self.implot_limits_need_set = [True] * self.buffer_info.channels
         if self.implot_playhead:
             self.implot_playhead = self.sample_to_position(
                 self.position_to_sample(self.implot_playhead),
@@ -295,104 +295,110 @@ class BufferEditor:
             limits_changed = False
             limit_delay_frames = 2
 
-            for channel in range(num_channels + 1):
+            for channel in range(num_channels):
                 channel_tool_width = 100
 
                 imgui.push_id(str(channel))
+                chan_size = self.channel_options[channel].get("size", "normal")
+                chan_size_lines = self.SIZE_IN_LINES.get(chan_size, 6)
+                plot_flags = implot.Flags_.crosshairs | implot.Flags_.no_legend
+
                 if channel == 0:
-                    height = line_height * 4
-                    plot_flags = implot.Flags_.no_mouse_text
-                    x_axis_flags = implot.AxisFlags_.no_label
+                    x_axis_flags = implot.AxisFlags_.no_label | implot.AxisFlags_.opposite
                     y_axis_flags = implot.AxisFlags_.no_tick_labels | implot.AxisFlags_.no_label
+                    chan_size_lines += 1
                 else:
-                    chan_size = self.channel_options[channel - 1].get("size", "normal")
-                    chan_size_lines = self.SIZE_IN_LINES.get(chan_size, 6)
-                    height = line_height * chan_size_lines
-                    plot_flags = implot.Flags_.crosshairs | implot.Flags_.no_legend
                     x_axis_flags = implot.AxisFlags_.no_tick_labels | implot.AxisFlags_.no_label
                     y_axis_flags = implot.AxisFlags_.no_tick_labels | implot.AxisFlags_.no_label
 
+                height = line_height * chan_size_lines
+
+                imgui.push_font(imgui.get_font(), 14)
+                imgui.begin_group()
+                imgui.dummy([1, height-1])
+                imgui.same_line()
+
+                # config buttons
+                imgui.begin_group()
+
+                # spacer in channel controls to allow for timeline
                 if channel == 0:
-                    imgui.dummy([channel_tool_width, height])
-                    imgui.same_line()
-                else:
-                    imgui.push_font(imgui.get_font(), 14)
-                    imgui.begin_group()
-                    imgui.dummy([1, height-1])
-                    imgui.same_line()
+                    imgui.dummy([1, line_height])
 
-                    # config buttons
-                    imgui.begin_group()
-                    imgui.push_style_color(
-                        imgui.Col_.frame_bg, ColorDB().find("default-canvas-color").to_rgbaf()
+                imgui.push_style_color(
+                    imgui.Col_.frame_bg, ColorDB().find("default-canvas-color").to_rgbaf()
+                )
+                imgui.push_style_var(imgui.StyleVar_.item_spacing, [0, 2])
+                for option in ("mute", "solo", "rec", "fx"):
+                    changed, checked = imgui.checkbox(
+                        option.upper(),
+                        self.channel_options[channel].get(option, False)
                     )
-                    imgui.push_style_var(imgui.StyleVar_.item_spacing, [0, 2])
-                    for option in ("mute", "solo", "rec", "fx"):
-                        changed, checked = imgui.checkbox(
-                            option.upper(),
-                            self.channel_options[channel - 1].get(option, False)
-                        )
-                        if changed:
-                            self.channel_options[channel - 1][option] = checked
-                            options_changed = True
+                    if changed:
+                        self.channel_options[channel][option] = checked
+                        options_changed = True
 
-                    imgui.pop_style_var()
-                    imgui.pop_style_color()
-                    imgui.end_group()
-                    imgui.same_line()
+                imgui.pop_style_var()
+                imgui.pop_style_color()
+                imgui.end_group()
+                imgui.same_line()
 
-                    # channel menu and meters
-                    in_rms = in_peak = out_rms = out_peak = 0
-                    achan = 4*(channel-1)
+                # channel menu and meters
+                in_rms = in_peak = out_rms = out_peak = 0
+                achan = 4*channel
 
-                    if len(channel_ampls) > achan + 3:
-                        in_rms = channel_ampls[achan]
-                        in_peak = channel_ampls[achan+1]
-                        out_rms = channel_ampls[achan+2]
-                        out_peak = channel_ampls[achan+3]
+                if len(channel_ampls) > achan + 3:
+                    in_rms = channel_ampls[achan]
+                    in_peak = channel_ampls[achan+1]
+                    out_rms = channel_ampls[achan+2]
+                    out_peak = channel_ampls[achan+3]
 
-                    imgui.dummy([10, 1])
-                    imgui.same_line()
+                imgui.dummy([10, 1])
+                imgui.same_line()
 
-                    imgui.begin_group()
+                imgui.begin_group()
 
-                    # channel menu
-                    imgui.dummy([1, 3])
-                    imgui.push_style_var(imgui.StyleVar_.frame_padding, [4, 6])
-                    imgui.push_style_var(imgui.StyleVar_.frame_rounding, 4)
-                    if imgui.image_button(
-                        "##channel_menubutton", imgui.ImTextureRef(dots[0]),
-                        [15, 3]
-                    ):
-                        imgui.open_popup("##bufedit_channel_popup")
+                # spacer in channel controls to allow for timeline
+                if channel == 0:
+                    imgui.dummy([1, line_height])
 
-                    menu_button.render_channel_menu(self.app_window, channel-1)
-                    th = imgui.get_item_rect_size()[1]
-                    imgui.pop_style_var(2)
-                    imgui.dummy([1, 3])
+                # channel menu
+                imgui.dummy([1, 3])
+                imgui.push_style_var(imgui.StyleVar_.frame_padding, [4, 6])
+                imgui.push_style_var(imgui.StyleVar_.frame_rounding, 4)
+                if imgui.image_button(
+                    "##channel_menubutton", imgui.ImTextureRef(dots[0]),
+                    [15, 3]
+                ):
+                    imgui.open_popup("##bufedit_channel_popup")
 
-                    # meters
-                    imgui.begin_group()
-                    self.render_meter_bar(
-                        min(height, 6 * line_height) - th - 10, in_rms, in_peak,
-                    )
-                    imgui.end_group()
-                    imgui.same_line()
-                    imgui.dummy([3, 1])
-                    imgui.same_line()
+                menu_button.render_channel_menu(self.app_window, channel)
+                th = imgui.get_item_rect_size()[1]
+                imgui.pop_style_var(2)
+                imgui.dummy([1, 3])
 
-                    imgui.begin_group()
-                    self.render_meter_bar(
-                        min(height, 6 * line_height) - th - 10, out_rms, out_peak
-                    )
-                    imgui.end_group()
-                    imgui.end_group()
-                    imgui.end_group()
-                    spacer = channel_tool_width - imgui.get_item_rect_size()[0]
-                    imgui.same_line()
-                    imgui.dummy([spacer, 1])
-                    imgui.same_line()
-                    imgui.pop_font()
+                # meters
+                imgui.begin_group()
+                self.render_meter_bar(
+                    min(height, 6 * line_height) - th - 10, in_rms, in_peak,
+                )
+                imgui.end_group()
+                imgui.same_line()
+                imgui.dummy([3, 1])
+                imgui.same_line()
+
+                imgui.begin_group()
+                self.render_meter_bar(
+                    min(height, 6 * line_height) - th - 10, out_rms, out_peak
+                )
+                imgui.end_group()
+                imgui.end_group()
+                imgui.end_group()
+                spacer = channel_tool_width - imgui.get_item_rect_size()[0]
+                imgui.same_line()
+                imgui.dummy([spacer, 1])
+                imgui.same_line()
+                imgui.pop_font()
 
                 # the plot itself
                 imgui.begin_group()
@@ -417,7 +423,7 @@ class BufferEditor:
                             self.implot_limits = implot.Rect(
                                 x_min=0, x_max=1, y_min=-1, y_max=1
                             )
-                            self.implot_limits_need_set = [True] * (num_channels + 1)
+                            self.implot_limits_need_set = [True] * num_channels
                         elif self.implot_limits_counter > 0:
                             self.implot_limits_counter -= 1
 
@@ -468,17 +474,16 @@ class BufferEditor:
                             limit_delay_frames = 1
                             self.channel_selections_active[channel] = False
 
-                    if channel > 0:
-                        # use the right subsampled data
-                        if peak_scale is None:
-                            peak_scale = self.get_peak_scale(self.implot_limits)
-                            peaks = self.buffer_peaks[peak_scale]
-                        y_values = peaks[0][channel - 1]
+                    # use the right subsampled data
+                    if peak_scale is None:
+                        peak_scale = self.get_peak_scale(self.implot_limits)
+                        peaks = self.buffer_peaks[peak_scale]
 
-                        x_values = peaks[1] * x_scale - x_offset
+                    y_values = peaks[0][channel]
+                    x_values = peaks[1] * x_scale - x_offset
 
-                        # the actual line!
-                        implot.plot_line("Buffer edit", x_values, y_values)
+                    # the actual line!
+                    implot.plot_line("Buffer edit", x_values, y_values)
 
                     # if we have a selection, show it as a drag rect
                     drag_color = [*self.app_window.get_color("selbox-fill-color").to_rgbaf()]
@@ -504,7 +509,7 @@ class BufferEditor:
                     if imgui.is_item_hovered():
                         plot_hovered = True
 
-                show_spectrogram = channel > 0 and self.channel_options[channel-1].get("spectrogram")
+                show_spectrogram = self.channel_options[channel].get("spectrogram")
                 if show_spectrogram and implot.begin_plot(
                     "##buf_edit_spectrogram",
                     [-1, height],
@@ -528,7 +533,7 @@ class BufferEditor:
 
                     if plot_height:
                         spectrogram_data = self.get_spectrogram_data(
-                            channel - 1,
+                            channel,
                             self.implot_limits.x.min, self.implot_limits.x.max,
                             plot_width, plot_height,
                         )
@@ -556,7 +561,7 @@ class BufferEditor:
                 self.implot_playhead_needs_set = False
 
             if limits_changed:
-                self.implot_limits_need_set = [True] * (num_channels + 1)
+                self.implot_limits_need_set = [True] * num_channels
                 self.implot_limits = limits_changed
                 self.implot_limits_counter = limit_delay_frames
 
@@ -675,12 +680,12 @@ class BufferEditor:
         delta_range = -0.5 * orig_range * delta
         self.implot_limits.x.max += delta_range
         self.implot_limits.x.min -= delta_range
-        self.implot_limits_need_set = [True] * (self.buffer_info.channels + 1)
+        self.implot_limits_need_set = [True] * self.buffer_info.channels
 
     async def zoom_to_selection(self):
         self.implot_limits.x.max = self.implot_selection.x.max
         self.implot_limits.x.min = self.implot_selection.x.min
-        self.implot_limits_need_set = [True] * (self.buffer_info.channels + 1)
+        self.implot_limits_need_set = [True] * self.buffer_info.channels
 
     async def playhead_center_view(self):
         vmin = self.implot_limits.x.min
@@ -689,7 +694,7 @@ class BufferEditor:
         delta_center = self.implot_playhead - cur_center
         self.implot_limits.x.max = vmax + delta_center
         self.implot_limits.x.min = vmin + delta_center
-        self.implot_limits_need_set = [True] * (self.buffer_info.channels + 1)
+        self.implot_limits_need_set = [True] * self.buffer_info.channels
 
     def channel_options_rec_mask(self):
         mask = 0
