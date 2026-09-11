@@ -176,7 +176,7 @@ class BufferEditor:
         self.buffer_units = units
         self.buffer_origin = origin
 
-    def position_to_sample(self, position, units=None, origin=None):
+    def position_to_sample(self, position, units=None, origin=None, clip=True):
         if units is None:
             units = self.buffer_units
         if origin is None:
@@ -188,7 +188,10 @@ class BufferEditor:
             sample_pos = (60 * position / self.buffer_bpm) * self.buffer_info.rate
         else:
             sample_pos = position * self.buffer_info.rate
-        return max(0, min(max_position, sample_pos))
+        if clip:
+            return max(0, min(max_position, sample_pos))
+        else:
+            return sample_pos
 
     def sample_to_position(self, sample, units=None, origin=None):
         if units is None:
