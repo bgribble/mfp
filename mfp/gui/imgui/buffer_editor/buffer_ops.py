@@ -411,6 +411,7 @@ async def buffer_import(self, filename):
 
         # buffer_data only should include the audio data
         self.buffer_data = self.buffer_data[:-3]
+        self.implot_limits_need_set = [True] * len(self.buffer_data)
 
         self.app_window.signal_unlisten(handler_id[0])
 
