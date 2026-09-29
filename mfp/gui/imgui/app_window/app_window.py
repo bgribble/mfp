@@ -337,6 +337,8 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                 MFPGUI().async_task(self.buffer_editor.buffer_import(self.dnd_pending_filename))
                 self.dnd_pending_filename = None
                 self.dnd_pending_frames = 0
+            elif self.zone_selected == "canvas":
+                log.debug(f"[dnd] got dnd for '{self.dnd_pending_filename}")
 
         ########################################
         # global style setup
@@ -874,7 +876,11 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         if zone_name == self.zone_selected:
             return
 
-        old_modes = (self.input_mgr.global_mode, self.input_mgr.major_mode, [m for m in self.input_mgr.minor_modes])
+        old_modes = (
+            self.input_mgr.global_mode,
+            self.input_mgr.major_mode,
+            [m for m in self.input_mgr.minor_modes if m.enabled]
+        )
         old_zone = self.zone_selected
 
         self.zone_selected = zone_name
@@ -901,15 +907,15 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             new_major = ConsoleMajorMode(self)
             new_mode = True
         elif zone_name == "cmdline":
-            new_minor = (self.cmd_manager.mode, )
+            new_minor = [self.cmd_manager.mode, ]
             new_mode = True
         elif zone_name == "console drag":
             from mfp.gui.modes.resize_modes import ConsoleResizeMode
-            new_minor = (ConsoleResizeMode(self),)
+            new_minor = [ConsoleResizeMode(self),]
             new_mode = True
         elif zone_name == "info drag":
             from mfp.gui.modes.resize_modes import InfoResizeMode
-            new_minor = (InfoResizeMode(self),)
+            new_minor = [InfoResizeMode(self),]
             new_mode = True
         elif zone_name == "menu" and "canvas" in self.zone_modes:
             new_global, new_major, new_minor = self.zone_modes.get("canvas")
@@ -920,7 +926,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
                 self.zone_modes[old_zone] = old_modes
 
             for mode in old_modes[2]:
-                self.input_mgr.disable_minor_mode(mode)
+                self.input_mgr.disable_minor_mode(mode, clear_cache=False)
 
             if new_global:
                 self.input_mgr.global_mode = new_global

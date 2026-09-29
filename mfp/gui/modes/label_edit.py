@@ -254,7 +254,7 @@ class LabelEditMode (InputMode):
 
     def disable(self):
         self.end_editing()
-        return True
+        return super().disable()
 
     def start_editing(self):
         def synth_ret(*args):

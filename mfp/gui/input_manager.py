@@ -265,7 +265,7 @@ class InputManager:
         if (
             isinstance(self.global_mode, mode_type)
             or isinstance(self.major_mode, mode_type)
-            or any(isinstance(m, mode_type) for m in self.minor_modes)
+            or any(isinstance(m, mode_type) and m.enabled for m in self.minor_modes)
         ):
             return True
         return False
@@ -288,9 +288,16 @@ class InputManager:
         if do_enable:
             mode.enable()
 
-    def disable_minor_mode(self, mode):
+    def disable_minor_mode(self, mode, clear_cache=True):
         if mode not in self.minor_modes:
             return
+
+        if clear_cache:
+            new_cache = {}
+            for zone, modes in self.window.zone_modes.items():
+                mode_global, mode_major, modes_minor = modes
+                if mode in modes_minor:
+                    modes_minor.remove(mode)
 
         cb = mode.disable()
         if inspect.isawaitable(cb):
