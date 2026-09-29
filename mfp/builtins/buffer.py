@@ -171,7 +171,7 @@ class Buffer(Processor):
             import samplerate as rateconv
             self.file_ready = False
             clean_name = Path(self.file_name).expanduser().resolve()
-            log.debug(f"[buffer] Reading from file '{self.file_name}'")
+            log.debug(f"[buffer] Reading from file '{self.file_name}' ('{clean_name}')")
             data, samplerate = sf.read(clean_name, dtype=numpy.float32)
             self.file_channels = 1 if len(data.shape) == 1 else data.shape[1]
 
