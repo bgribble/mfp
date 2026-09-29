@@ -18,7 +18,7 @@ api_create_callback(Carp__PythonValue * response, void * data)
 void
 mfp_api_init(void)
 {
-    const char service_name[] = "MFPCommand";
+    const char * service_name = "MFPCommand";
     int instance_id = 0;
     mfp_rpc_argblock argblock;
     mfp_rpc_args * args = mfp_rpc_args_init(&argblock);
@@ -54,7 +54,7 @@ int
 mfp_api_send_to_inlet(mfp_context * context, int port, float value,
                       char * msgbuf, int * msglen)
 {
-    const char service_name[] = "MFPCommand.send";
+    const char * service_name = "MFPCommand.send";
     const int instance_id = api_rpcid;
     mfp_rpc_argblock argblock;
     mfp_rpc_args * arglist = mfp_rpc_args_init(&argblock);
@@ -74,7 +74,7 @@ int
 mfp_api_send_to_outlet(mfp_context * context, int port, float value,
                        char * msgbuf, int * msglen)
 {
-    const char service_name[] = "MFPCommand.send_to_outlet";
+    const char * service_name = "MFPCommand.send_to_outlet";
     const int instance_id = api_rpcid;
     mfp_rpc_argblock argblock;
     mfp_rpc_args * arglist = mfp_rpc_args_init(&argblock);
@@ -95,7 +95,7 @@ mfp_api_send_midi_to_inlet(
     mfp_context * context, int port, int64_t value,
     char * msgbuf, int * msglen
 ) {
-    const char service_name[] = "MFPCommand.send_midi";
+    const char * service_name = "MFPCommand.send_midi";
     const int instance_id = api_rpcid;
     mfp_rpc_argblock argblock;
     mfp_rpc_args * arglist = mfp_rpc_args_init(&argblock);
@@ -116,7 +116,7 @@ mfp_api_send_midi_to_outlet(
     mfp_context * context, int port, int64_t value,
     char * msgbuf, int * msglen
 ) {
-    const char service_name[] = "MFPCommand.send_midi_to_outlet";
+    const char * service_name = "MFPCommand.send_midi_to_outlet";
     const int instance_id = api_rpcid;
     mfp_rpc_argblock argblock;
     mfp_rpc_args * arglist = mfp_rpc_args_init(&argblock);
@@ -135,7 +135,7 @@ mfp_api_send_midi_to_outlet(
 int
 mfp_api_show_editor(mfp_context * context, int show, char * msgbuf, int * msglen)
 {
-    const char service_name[] = "MFPCommand.show_editor";
+    const char * service_name = "MFPCommand.show_editor";
     const int instance_id = api_rpcid;
     mfp_rpc_argblock argblock;
     mfp_rpc_args * arglist = mfp_rpc_args_init(&argblock);
@@ -153,7 +153,7 @@ mfp_api_show_editor(mfp_context * context, int show, char * msgbuf, int * msglen
 int
 mfp_api_open_context(mfp_context * context, char * msgbuf, int * msglen)
 {
-    const char service_name[] = "MFPCommand.open_context";
+    const char * service_name = "MFPCommand.open_context";
     const int instance_id = api_rpcid;
     mfp_rpc_argblock argblock;
     mfp_rpc_args * arglist = mfp_rpc_args_init(&argblock);
@@ -174,7 +174,7 @@ mfp_api_load_context(
     mfp_context * context, char * patchfile, char * msgbuf, int * msglen
 )
 {
-    const char service_name[] = "MFPCommand.load_context";
+    const char * service_name = "MFPCommand.load_context";
     const int instance_id = api_rpcid;
     mfp_rpc_argblock argblock;
     mfp_rpc_args * arglist = mfp_rpc_args_init(&argblock);
@@ -193,7 +193,7 @@ mfp_api_load_context(
 int
 mfp_api_dsp_response(int proc_id, char * resp, int resp_type, char * msgbuf, int * msglen)
 {
-    const char service_name[] = "MFPCommand.dsp_response";
+    const char * service_name = "MFPCommand.dsp_response";
     const int instance_id = api_rpcid;
     mfp_rpc_argblock argblock;
     mfp_rpc_args * arglist = mfp_rpc_args_init(&argblock);
@@ -213,7 +213,7 @@ mfp_api_dsp_response(int proc_id, char * resp, int resp_type, char * msgbuf, int
 int
 mfp_api_close_context(mfp_context * context)
 {
-    const char service_name[] = "MFPCommand.close_context";
+    const char * service_name = "MFPCommand.close_context";
     const int instance_id = api_rpcid;
     mfp_rpc_argblock argblock;
     mfp_rpc_args * arglist = mfp_rpc_args_init(&argblock);
