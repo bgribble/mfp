@@ -263,7 +263,7 @@ mfp_rpc_request(const char * service_name,
 
     call_data.host_id = rpc_peer_id;
     call_data.call_id = req_id;
-    call_data.service_name = (char *)service_name;
+    call_data.service_name = (char *)g_strdup(service_name);
     call_data.instance_id = instance_id;
     call_data.args = (Carp__PythonArray *)args;
     call_data.kwargs = NULL;
@@ -493,6 +493,10 @@ mfp_rpc_dispatch_pb2(const char * msgbuf, int msglen)
                 &msglen
             );
             mfp_comm_submit_buffer(msgbuf, msglen);
+        }
+        if (calldata->service_name) {
+            g_free(calldata->service_name);
+            calldata->service_name = NULL;
         }
         carp__call_data__free_unpacked(calldata, NULL);
     }
