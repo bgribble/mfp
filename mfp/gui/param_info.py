@@ -36,8 +36,10 @@ class ParamInfo(Serializable):
         obj = cls(**values)
         return obj
 
-class BitArray (tuple):
+
+class BitArray (list):
     pass
+
 
 class PyLiteral (str):
     pass

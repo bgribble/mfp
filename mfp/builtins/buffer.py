@@ -135,9 +135,9 @@ class Buffer(Processor):
             'buf_mode': 0,
             'rec_enabled': 0,
             'channels': 1,
-            'play_channels': (0, 0),
-            'rec_channels': (0, 0),
-            'monitor_channels': (0, 0),
+            'play_channels': [0, 0],
+            'rec_channels': [0, 0],
+            'monitor_channels': [0, 0],
         }
 
         self.dsp_inlets = list(range(self.init_channels))
@@ -226,7 +226,7 @@ class Buffer(Processor):
                 channels = self.properties.get("channels")
                 if not channels:
                     continue
-                self.properties[prop] = (params[prop], channels)
+                self.properties[prop] = [params[prop], channels]
                 prop_update = True
 
         if "buf_mode" in self.properties and "buf_state" in self.properties:
@@ -339,13 +339,13 @@ class Buffer(Processor):
         self.properties["channels"] = channels
         if "play_channels" in self.properties:
             oldval = self.properties["play_channels"]
-            self.properties["play_channels"] = (oldval[0], channels)
+            self.properties["play_channels"] = [oldval[0], channels]
         if "rec_channels" in self.properties:
             oldval = self.properties["rec_channels"]
-            self.properties["rec_channels"] = (oldval[0], channels)
+            self.properties["rec_channels"] = [oldval[0], channels]
         if "monitor_channels" in self.properties:
             oldval = self.properties["monitor_channels"]
-            self.properties["monitor_channels"] = (oldval[0], channels)
+            self.properties["monitor_channels"] = [oldval[0], channels]
 
     async def dsp_response(self, resp_id, resp_value):
         need_resize = False
@@ -353,7 +353,10 @@ class Buffer(Processor):
         if resp_id in (self.RESP_TRIGGERED, self.RESP_LOOPSTART):
             self.outlets[-1] = resp_value
             self.properties["buf_state"] = resp_value
-            self.set_tag("play", bool(resp_value))
+            if resp_value:
+                self.set_tag("transport", "play")
+            else:
+                self.set_tag("transport", "stop")
             need_props = True
         elif resp_id == self.RESP_BUFID:
             if self.shm_obj:
