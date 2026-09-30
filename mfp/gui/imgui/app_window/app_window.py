@@ -873,6 +873,10 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             self.zone_select(zone_name)
 
     def zone_select(self, zone_name):
+        from mfp.gui.modes.resize_modes import InfoResizeMode, ConsoleResizeMode
+        from mfp.gui.modes.console_mode import ConsoleMode, ConsoleMajorMode
+        from mfp.gui.modes.buffer_edit import BufferEditMode
+
         if zone_name == self.zone_selected:
             return
 
@@ -898,11 +902,9 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             new_global, new_major, new_minor = self.zone_modes.get(zone_name)
             new_mode = True
         elif zone_name == "bufedit":
-            from mfp.gui.modes.buffer_edit import BufferEditMode
             new_major = BufferEditMode(self)
             new_mode = True
         elif zone_name == "console":
-            from mfp.gui.modes.console_mode import ConsoleMode, ConsoleMajorMode
             new_global = ConsoleMode(self)
             new_major = ConsoleMajorMode(self)
             new_mode = True
@@ -910,16 +912,23 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
             new_minor = [self.cmd_manager.mode, ]
             new_mode = True
         elif zone_name == "console drag":
-            from mfp.gui.modes.resize_modes import ConsoleResizeMode
             new_minor = [ConsoleResizeMode(self),]
             new_mode = True
         elif zone_name == "info drag":
-            from mfp.gui.modes.resize_modes import InfoResizeMode
             new_minor = [InfoResizeMode(self),]
             new_mode = True
         elif zone_name == "menu" and "canvas" in self.zone_modes:
             new_global, new_major, new_minor = self.zone_modes.get("canvas")
             new_mode = True
+
+        if zone_name != "console drag":
+            new_minor = [
+                m for m in new_minor if not isinstance(m, ConsoleResizeMode)
+            ]
+        if zone_name != "info drag":
+            new_minor = [
+                m for m in new_minor if not isinstance(m, InfoResizeMode)
+            ]
 
         if new_mode:
             if save_old:
