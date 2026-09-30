@@ -173,10 +173,17 @@ class PatchEditMode (InputMode):
         if not self.enabled:
             return False
 
-        if self.window.selected:
+        next_selection = self.window.selected
+        if signal == "select" and obj not in self.window.selected:
+            next_selection = self.window.selected + [obj]
+        if signal == "unselect" and obj in self.window.selected:
+            next_selection = [o for o in self.window.selected if o != obj]
+
+        if next_selection:
             self.update_selection_mode()
         else:
             self.disable_selection_mode()
+        return False
 
     @classmethod
     def add_element(cls, element_type):
@@ -279,6 +286,10 @@ class PatchEditMode (InputMode):
             if not self.selection_edit_mode:
                 self.selection_edit_mode = SingleSelectionEditMode(self.window)
                 self.manager.enable_minor_mode(self.selection_edit_mode)
+        else:
+            if isinstance(self.selection_edit_mode, (SingleSelectionEditMode, MultiSelectionEditMode)):
+                self.manager.disable_minor_mode(self.selection_edit_mode)
+                self.selection_edit_mode = None
 
         return True
 
