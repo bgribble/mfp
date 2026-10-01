@@ -66,6 +66,15 @@ def render(app_window):
         and app_window.cmd_hud_expiry > datetime.now()
     ):
         imgui.text(app_window.cmd_hud_text)
+
+        if app_window.cmd_hud_spinner:
+            spin_choices = len(app_window.cmd_hud_spinner)
+            spin_text = app_window.cmd_hud_spinner[
+                int(datetime.now().timestamp()) % spin_choices
+            ]
+            imgui.same_line()
+            imgui.text(f"{spin_text}")
+
         imgui.end()
         return
 

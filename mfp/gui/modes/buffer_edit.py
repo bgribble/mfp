@@ -496,7 +496,7 @@ class BufferEditMode (InputMode):
         self.window.hud_write(', '.join(message), display_time=15)
 
     async def analyze_bpm(self):
-        self.window.hud_write("Analyzing...")
+        self.window.hud_write("Analyzing", spinner=['.', '..', '...', '....'])
         bpm = await self.editor.analyze_bpm()
         if bpm is not None:
             words = []

@@ -93,6 +93,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.cmd_file_dialog = None
         self.cmd_hud_text = None
         self.cmd_hud_expiry = None
+        self.cmd_hud_spinner = None
 
         self.autoplace_x = None
         self.autoplace_y = None
@@ -703,9 +704,10 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.cmd_hud_text = re.sub(r'<[^>]*?>', '', message).split("\n")[0]
         self.cmd_hud_expiry = datetime.now() + timedelta(seconds=display_time)
 
-    def hud_write(self, message, display_time=3.0):
+    def hud_write(self, message, spinner=None, display_time=3.0):
         self.cmd_hud_text = re.sub(r'<[^>]*?>', '', message).split("\n")[0]
         self.cmd_hud_expiry = datetime.now() + timedelta(seconds=display_time)
+        self.cmd_hud_spinner = spinner
 
     def cmd_set_prompt(self, prompt, default='', space=True, filename=False):
         self.cmd_prompt = prompt

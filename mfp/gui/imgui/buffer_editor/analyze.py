@@ -5,7 +5,8 @@ Copyright (c) Bill Gribble <grib@billgribble.com>
 """
 import math
 import numpy as np
-
+import asyncio
+from threading import Thread
 import pyloudnorm
 import librosa
 
@@ -65,25 +66,37 @@ async def analyze_loudness(self):
 
 @extends(BufferEditor)
 async def analyze_bpm(self):
-    if self.implot_selection:
-        start = self.implot_selection.x.min
-        end = self.implot_selection.x.max
-    else:
-        start = 0
-        end = self.implot_total_time
+    ready = asyncio.Event()
+    loop = asyncio.get_event_loop()
 
-    sample_start = int(self.position_to_sample(start))
-    sample_end = int(self.position_to_sample(end))
-    sample_size = sample_end - sample_start
+    tempo = [None]
 
-    region = np.array([
-        chan[sample_start:sample_end] for chan in self.buffer_data
-    ])
+    def _analyze_thread():
+        if self.implot_selection:
+            start = self.implot_selection.x.min
+            end = self.implot_selection.x.max
+        else:
+            start = 0
+            end = self.implot_total_time
 
-    tempo = None
-    try:
-        tempo, beat_frames = librosa.beat.beat_track(y=region, sr=self.buffer_info.rate, sparse=False)
-    except Exception as e:
-        log.debug(f"[tempo] error {e}")
+        sample_start = int(self.position_to_sample(start))
+        sample_end = int(self.position_to_sample(end))
 
-    return tempo
+        region = np.array([
+            chan[sample_start:sample_end] for chan in self.buffer_data
+        ])
+
+        bpm = None
+        try:
+            bpm, beat_frames = librosa.beat.beat_track(y=region, sr=self.buffer_info.rate, sparse=False)
+            tempo[0] = bpm
+        except Exception as e:
+            log.debug(f"[tempo] error {e}")
+        loop.call_soon_threadsafe(ready.set)
+
+    thread = Thread(target=_analyze_thread)
+    thread.start()
+    await ready.wait()
+    thread.join()
+
+    return tempo[0]
