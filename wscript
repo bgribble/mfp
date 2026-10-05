@@ -333,8 +333,18 @@ def options(opt):
 def configure(ctxt):
     ctxt.load(WAFTOOLS)
 
-    # Python and dev files
+    # Python and dev files.
+    # Minimum Python is 3.10, max is 3.13.x (some dependencies won't build with
+    # 3.14)
     ctxt.check_python_version((3, 10))
+
+    py_ver = tuple(map(int, ctxt.env.PYTHON_VERSION.split('.')))
+    not_allowed_ver = (3, 14)
+    if py_ver >= not_allowed_ver:
+        ctxt.fatal(
+            f"Python version {ctxt.env.PYTHON_VERSION} is too new. Maximum allowed version is 3.13.x"
+        )
+
     ctxt.check_python_headers()
 
     # check for Debian style
