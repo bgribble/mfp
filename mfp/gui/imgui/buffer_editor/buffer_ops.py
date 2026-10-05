@@ -189,7 +189,7 @@ async def buffer_trim_to_selection(self):
 
 @extends(BufferEditor)
 async def buffer_change_tempo(self, ratio, method):
-    import resampy
+    import samplerate as rateconv
     import paulstretch
 
     if not self.buffer_data:
@@ -202,8 +202,6 @@ async def buffer_change_tempo(self, ratio, method):
         sel_start = int(self.position_to_sample(self.implot_selection.x.min))
         sel_size = int(self.position_to_sample(self.implot_selection.x.max - self.implot_selection.x.min))
 
-    log.debug(f"[tempo] ratio={ratio} method={method} sel_start={sel_start} sel_size={sel_size}")
-
     orig_data = [
         chan[sel_start:sel_start+sel_size].copy()
         for chan in self.buffer_data
@@ -211,7 +209,7 @@ async def buffer_change_tempo(self, ratio, method):
 
     if method == "resample":
         new_data = [
-            resampy.resample(chan, 48000, 48000 * ratio)
+            rateconv.resample(chan, ratio)
             for chan in orig_data
         ]
 

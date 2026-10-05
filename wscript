@@ -209,7 +209,7 @@ class MFPInstallContext (InstallContext):
             f"mkdir -p {self.env.PREFIX}/share/mfp/",
             f"cd {self.env.PREFIX}",
             "cd share/mfp/",
-            f"{python_name} -m venv --system-site-packages venv",
+            f"{python_name} -m venv venv",
             "cp venv/bin/activate venv/bin/activate.orig"
         ])
         print(f"[build_virtualenv] {vrule}")
@@ -393,7 +393,7 @@ def configure(ctxt):
     ctxt.find_program("cmake")
 
     pip_libs = [
-        "posix_ipc", "simplejson", "numpy", "resampy",
+        "posix_ipc", "simplejson", "numpy",
         "pynose", "yappi", "cython", "pyliblo3",
         "soundfile", "samplerate", "alsa-midi",
         # my other libs

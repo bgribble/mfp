@@ -353,7 +353,6 @@ class BufferEditMode (InputMode):
     async def adjust_bpm(self, from_bpm=None, to_bpm=None):
         params = dict(from_bpm=self.editor.buffer_bpm)
         async def method_cb(method_value):
-            log.debug(f"adjust: method_value={method_value}")
             if method_value:
                 params["method"] = str(method_value).lower()[0]
                 self.window.hud_write(f"Adjusting BPM {params}")

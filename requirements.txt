@@ -22,7 +22,6 @@ pynose==1.5.4
 PyOpenGL==3.1.9
 PySDL2==0.9.17
 python-dateutil==2.9.0.post0
-resampy==0.4.3
 samplerate==0.2.1
 setuptools==78.1.1
 simplejson==3.20.1

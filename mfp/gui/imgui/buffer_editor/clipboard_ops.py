@@ -271,7 +271,7 @@ async def clipboard_paste__mixing(self):
 
 @extends(BufferEditor)
 async def clipboard_paste_to_fit__resample(self):
-    import resampy
+    import samplerate as rateconv
 
     if not self.buffer_data or self.implot_selection is None:
         return
@@ -283,7 +283,7 @@ async def clipboard_paste_to_fit__resample(self):
     )
 
     new_data = [
-        resampy.resample(chan_data, 48000, 48000 * (sel_size / self.clipboard_size))
+        rateconv.resample(chan_data, (sel_size / self.clipboard_size))
         for chan_data in self.clipboard_data
     ]
 
