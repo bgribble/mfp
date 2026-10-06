@@ -21,7 +21,7 @@ from .buffer_editor import BufferEditor
 ########################################
 # buffer operations
 @extends(BufferEditor)
-def buffer_grab(self, shm_obj=None, buffer_info=None):
+def buffer_grab(self, shm_obj=None, buffer_info=None, channels=None):
     if buffer_info is None:
         buffer_info = self.buffer_info
 
@@ -36,21 +36,24 @@ def buffer_grab(self, shm_obj=None, buffer_info=None):
             self.shm_obj = SharedMemory(buffer_info.buf_id)
         shm_obj = self.shm_obj
 
+    if channels is None:
+        channels = buffer_info.channels
+
     self.buffer_data = []
     self.spectral_data_cache = {}
 
-    self.channel_selections = [None] * buffer_info.channels
-    self.channel_selections_active = [False] * buffer_info.channels
-    if len(self.channel_options) < buffer_info.channels:
+    self.channel_selections = [None] * channels
+    self.channel_selections_active = [False] * channels
+    if len(self.channel_options) < channels:
         self.channel_options = (
             self.channel_options
-            + [dict(fx=True) for _ in range(buffer_info.channels - len(self.channel_options))]
+            + [dict(fx=True) for _ in range(channels - len(self.channel_options))]
         )
     self.implot_limits = None
-    self.implot_limits_need_set = [None] * buffer_info.channels
+    self.implot_limits_need_set = [None] * channels
 
     try:
-        for c in range(buffer_info.channels):
+        for c in range(channels):
             os.lseek(shm_obj.fd, offset(c), os.SEEK_SET)
             slc = os.read(shm_obj.fd, int(buffer_info.size * self.FLOAT_SIZE))
             self.buffer_data.append(np.fromstring(slc, dtype=np.float32))

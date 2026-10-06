@@ -97,7 +97,9 @@ async def playhead_pause(self, new_pos=None):
                 need_update = 1
         if need_update:
             self.rec_recording_updated = now
-            self.buffer_grab(self.working_buf_obj)
+            self.buffer_grab(
+                self.working_buf_obj, self.working_buf_info, self.working_buf_info.channels-2
+            )
 
     self.implot_playhead_start_time = None
     self.implot_playhead_looping = False
@@ -242,7 +244,7 @@ async def playhead_insert_data(self, data):
     sel_start = int(self.position_to_sample(self.implot_playhead))
 
     self.buffer_data = [
-        np.insert(chan, sel_start, data)
+        np.insert(chan, sel_start, data).copy()
         for chan in self.buffer_data
     ]
 
