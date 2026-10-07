@@ -219,6 +219,20 @@ async def init_working_patch(self):
     self.buffer_sync(self.shm_obj, self.buffer_info, self.working_buf_obj, self.working_buf_info)
     self.buffer_compute_peaks()
 
+    # analyze the BPM
+    self.app_window.hud_write("Analyzing BPM", spinner=['.', '..', '...', '....'], display_time=2)
+    bpm = await self.analyze_bpm()
+    if bpm is not None:
+        channel_bpms = []
+        for chan, value in enumerate(bpm):
+            channel_bpms.append(float(value[0]))
+        channel_bpms.sort()
+        self.set_buffer_bpm(channel_bpms[int(len(channel_bpms) / 2)])
+        self.app_window.hud_write(f"Setting buffer BPM to {self.buffer_bpm}")
+        log.info(f"[buffer] Tempo is {self.buffer_bpm:.3f} BPM")
+    else:
+        self.app_window.hud_write("Cannot determine BPM")
+
 
 @extends(BufferEditor)
 async def close_working_patch(self):
