@@ -270,11 +270,11 @@ class GlobalMode (InputMode):
             keysym="S-HOVER"
         )
         cls.bind(
-            "reset-input", cls.force_reset, helptext="Reset all modifier keys and input modes",
+            "reset-input-shift", cls.force_reset, helptext="Reset all modifier keys and input modes",
             keysym="C->"
         )
         cls.bind(
-            "reset-input", cls.force_reset, helptext="Reset all modifier keys and input modes",
+            "reset-input-mouse", cls.force_reset, helptext="Reset all modifier keys and input modes",
             keysym="M1-C-."
         )
         cls.bind(
@@ -425,9 +425,6 @@ class GlobalMode (InputMode):
         """
         Toggle sample buffer editor
         """
-        from mfp.gui.imgui.buffer_editor import BufferEditor
-        from mfp.gui.modes import BufferEditMode
-
         if self.window.buffer_editor is None:
             await self.window.start_buffer_editor()
 
@@ -443,6 +440,7 @@ class GlobalMode (InputMode):
         return False
 
     async def force_reset(self):
+        log.debug(f"Resetting input modes")
         await self.window.unselect_all()
 
         while self.manager.minor_modes:

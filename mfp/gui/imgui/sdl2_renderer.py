@@ -177,6 +177,7 @@ class ImguiSDL2Renderer:
                     (SDL_SCANCODE_1, KMOD_CTRL, "1"),
                     (SDL_SCANCODE_9, KMOD_CTRL, "9"),
                     (SDL_SCANCODE_0, KMOD_CTRL, "0"),
+                    (SDL_SCANCODE_PERIOD, KMOD_CTRL, "."),
                 ]
 
                 ev = None
