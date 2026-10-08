@@ -189,7 +189,11 @@ def render_toolbar(self):
     if imgui.image_button(
         "##loop_btn", imgui.ImTextureRef(loop_tex[0]), [button_size, button_size]
     ):
-        MFPGUI().async_task(self.playhead_loop_selection())
+        if self.implot_playhead_looping:
+            MFPGUI().async_task(self.playhead_start())
+        else:
+            MFPGUI().async_task(self.playhead_loop_selection())
+
     if need_pop:
         imgui.pop_style_color(2)
 
