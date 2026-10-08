@@ -148,7 +148,7 @@ async def buffer_trim_to_selection(self):
         return
 
     sel_start = int(self.position_to_sample(self.implot_selection.x.min))
-    sel_size = int(self.position_to_sample(self.implot_selection.x.max) - self.position_to_sample(self.implot_selection.x.min))
+    sel_size = int(self.position_to_sample(self.implot_selection.x.max)) - sel_start
 
     self.buffer_data = [
         np.delete(
@@ -203,7 +203,7 @@ async def buffer_change_tempo(self, ratio, method):
         sel_size = len(self.buffer_data[0])
     else:
         sel_start = int(self.position_to_sample(self.implot_selection.x.min))
-        sel_size = int(self.position_to_sample(self.implot_selection.x.max - self.implot_selection.x.min))
+        sel_size = int(self.position_to_sample(self.implot_selection.x.max)) - sel_start
 
     orig_data = [
         chan[sel_start:sel_start+sel_size].copy()
