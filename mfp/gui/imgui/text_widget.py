@@ -98,7 +98,8 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         self.highlight_color = self.container.get_color("text-color:match")
 
         self.font_key_stack = []
-
+        self.color_stack_depth = 0
+        self.font_stack_depth = 0
         # cached transformed text
         self.transform_in = None
         self.transform_out = None
@@ -210,17 +211,21 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                 )
                 if new_font:
                     imgui.push_font(new_font, font_size)
+                    cls.imgui_currently_rendering.font_stack_depth += 1
             if color:
                 w = cls.imgui_currently_rendering
                 imgui.push_style_color(imgui.Col_.text, color)
+                cls.imgui_currently_rendering.color_stack_depth += 1
         else:
             if font_changed:
                 old_font_key = font_key_stack[-1]
                 font_key_stack[-1:] = []
                 if old_font_key:
                     imgui.pop_font()
+                    cls.imgui_currently_rendering.font_stack_depth -= 1
             if color:
                 imgui.pop_style_color()
+                cls.imgui_currently_rendering.color_stack_depth -= 1
 
     def simple_wrap(self, text, max_columns):
         lines = []
@@ -461,7 +466,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
         # for some reason imgui_md doesn't parse divs that start at the
         # beginning of the line. luckily it also doesn't render &nbsp;
-        md_text = re.sub(r'^( *)<', r'\1&nbsp;<', md_text, flags=re.MULTILINE)
+        md_text = re.sub(r'^( *>?)<', r'\1&nbsp;<', md_text, flags=re.MULTILINE)
 
         return md_text
 
@@ -514,6 +519,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         if self.font_color:
             color = ColorDB().backend.im_col32(self.font_color)
             imgui.push_style_color(imgui.Col_.text, color)
+            self.color_stack_depth += 1
 
         if highlight or (self.markdown_text and self.use_markup):
             # imgui_md draws underlines for H1 and H2 that need to
@@ -600,6 +606,17 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
 
         if self.font_color:
             imgui.pop_style_color()
+            self.color_stack_depth -= 1
+
+        if self.color_stack_depth > 0:
+            imgui.pop_style_color(self.color_stack_depth)
+        if self.font_stack_depth > 0:
+            while self.font_stack_depth > 0:
+                imgui.pop_font()
+                self.font_stack_depth -= 1
+
+        self.color_stack_depth = 0
+        self.font_stack_depth = 0
 
         imgui.end_group()
         imgui.pop_style_var()
