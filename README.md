@@ -13,34 +13,6 @@ there's enough there that I use it in my own music-making.  As of
 now it's pretty much a solo project but I welcome any feedback,
 questions, or pull requests.
 
-**What's happening now?** I am working on MFP pretty actively.
-The most recent release (0.8.5) now contains a new UI backend
-built with [Dear ImGUI](https://github.com/ocornut/imgui), via
-the excellent
-[imgui-bundle](https://github.com/pthom/imgui_bundle) bindings.
-The ImGUI UI is now the default; to use the old Clutter UI, be
-sure to build with it (see README.build) and launch with the
-option `--gui-backend=clutter`.
-
-The new UI looks quite a bit different. It's more like Max in the
-visual presentation of patches and the addition of a right-side
-parameter editing panel. It's already better than the Clutter UI
-in important ways. Some big differences:
-
-* A tiled patch display area, to allow multiple patches to be
-  viewed/edited at once
-* A menu bar that should reflect most available actions, and a
-  popup context menu for the current selection
-* Ability to directly edit object parameters and style in the
-  "Info" panel
-* Better plot support via
-  [ImPlot](https://github.com/epezent/implot)
-* A help system, not comprehensive but getting better coverage
-  all the time
-
-Development towards 0.9 will focus on stability and adding new
-features.
-
 ### NEW FEATURES
 
 I'm working on documentation but there are some really neat
@@ -54,7 +26,7 @@ preview. These are all in the `master` branch.
   files, apply effects (limited to gain, fade in/out, and
   comp/limiter ATM but you can also edit the effects live -- they
   are MFP patches). Peep the hamburger menu on the upper right
-  corner. 
+  corner.
 * **Persistent live coding in Python.** Every processor now has a
   "Custom code" parameter accessible through the Params tab of
   the Info panel (right side). Click the Edit button, enter
@@ -149,16 +121,11 @@ some that I will just have to ask for your patience with:
 Ticket | Description
 -------| --------------
  #299 | If JACK isn't running and can't be started, launch fails ugly
- #298 | Occasional retry loop on quit
- #297 | Bad behavior on abort of file load
- #292 | In larger patches, selection and interaction may get messed up
- #291 | When editing a label, the cursor disappears
  #204 | Logging is broken when loaded as LV2 plugin
- #212 | Rendering of smooth curves on XY plot shows gaps
  #220 | 'waf install' can give error messages. Workaround: See the bottom of README.build; possibly no action is required.
 
 See the tickets in GitHub for detail on what I know about these problems, and for
-other potential workarounds.0
+other potential workarounds.
 
 ## DOCUMENTATION
 
