@@ -14,8 +14,8 @@ from ..event import (
 )
 from imgui_bundle import imgui
 
-KEY_REPEAT_DELAY_US = 100000
-KEY_REPEAT_INTERVAL_US = 25000
+KEY_REPEAT_DELAY_US = 250000
+KEY_REPEAT_INTERVAL_US = 50000
 KEY_REPEAT_KEYS = [
     key_defs.KEY_UP,
     key_defs.KEY_DN,
