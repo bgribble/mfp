@@ -839,7 +839,7 @@ def render_style_tab(app_window):
 
             override_params = list(style.keys())
 
-            # the Element tab is the only on where params can be edited
+            # the Element tab is the only one where params can be edited
             imgui.set_cursor_pos_x(0)
             if imgui.begin_tab_item("Element")[0]:
                 imgui.set_cursor_pos_x(cp)
@@ -848,7 +848,11 @@ def render_style_tab(app_window):
                 imgui.same_line()
 
                 imgui.begin_group()
+                imgui.text("Style vars with 'Change' set editable here")
+                imgui.text("")
                 for propname, value in sel.style.items():
+                    if propname not in MFPGUI().style_vars:
+                        continue
                     pp = MFPGUI().style_vars[propname]
                     newval = render_param(app_window, propname, pp, value, sel)
                     if newval != value:
@@ -867,6 +871,8 @@ def render_style_tab(app_window):
 
                 imgui.begin_group()
                 for propname, value in type(sel).style_defaults.items():
+                    if propname not in MFPGUI().style_vars:
+                        continue
                     pp = MFPGUI().style_vars[propname]
                     override = propname in override_params
                     newval = render_param(
@@ -892,6 +898,8 @@ def render_style_tab(app_window):
 
                 imgui.begin_group()
                 for propname, value in BaseElement.style_defaults.items():
+                    if propname not in MFPGUI().style_vars:
+                        continue
                     pp = MFPGUI().style_vars[propname]
                     override = propname in override_params
                     newval = render_param(
@@ -917,6 +925,9 @@ def render_style_tab(app_window):
 
             imgui.begin_group()
             for propname, value in MFPGUI().style_defaults.items():
+                if propname not in MFPGUI().style_vars:
+                    continue
+
                 pp = MFPGUI().style_vars[propname]
                 override = propname in override_params
                 newval = render_param(
@@ -944,6 +955,8 @@ def render_style_tab(app_window):
 
                 # these should be readonly
                 for propname, value in sel._all_styles.items():
+                    if propname not in MFPGUI().style_vars:
+                        continue
                     pp = MFPGUI().style_vars[propname]
                     render_param(app_window, propname, pp, value, readonly=True)
                 imgui.end_group()
