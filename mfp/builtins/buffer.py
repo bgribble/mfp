@@ -171,26 +171,40 @@ class Buffer(Processor):
             import samplerate as rateconv
             self.file_ready = False
             clean_name = Path(self.file_name).expanduser().resolve()
-            log.debug(f"[buffer] Reading from file '{self.file_name}' ('{clean_name}')")
-            data, samplerate = sf.read(clean_name, dtype=numpy.float32)
-            self.file_channels = 1 if len(data.shape) == 1 else data.shape[1]
+            log.debug(f"[buffer] Opening file '{self.file_name}' ('{clean_name}')...")
+            if Path.is_file(clean_name):
+                try:
+                    data, samplerate = sf.read(clean_name, dtype=numpy.float32)
+                    self.file_channels = 1 if len(data.shape) == 1 else data.shape[1]
 
-            # sample rate convert if needed
-            mfp_samplerate = MFPApp().samplerate
-            if samplerate != mfp_samplerate:
-                log.debug(f"[buffer] Converting samplerate from {samplerate} to {mfp_samplerate}")
-                self.file_data = rateconv.resample(data, mfp_samplerate / samplerate, self.file_convert)
+                    # sample rate convert if needed
+                    mfp_samplerate = MFPApp().samplerate
+                    if samplerate != mfp_samplerate:
+                        log.debug(f"[buffer] Converting samplerate from {samplerate} to {mfp_samplerate}")
+                        self.file_data = rateconv.resample(
+                            data, mfp_samplerate / samplerate, self.file_convert
+                        )
+                    else:
+                        self.file_data = data
+
+                    self.file_len = self.file_data.shape[0]
+                    self.file_ready = True
+                except Exception as e:
+                    log.error(f"[buffer] {e}")
+                    self.error(f"{e}")
             else:
-                self.file_data = data
+                log.error(f"[buffer] File '{clean_name}' not found")
+                self.error("File not found")
 
-            self.file_len = self.file_data.shape[0]
-            self.file_ready = True
             loop.call_soon_threadsafe(ready.set)
 
         thread = Thread(target=_read_helper)
         thread.start()
         await ready.wait()
         thread.join()
+
+        if not self.file_ready:
+            return
 
         # if the buffer is already the right shape, just load the data
         if self.channels == (self.file_channels + extra_channels) and (self.size >= self.file_len):

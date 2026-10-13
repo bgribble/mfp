@@ -115,6 +115,7 @@ async def fx_apply_patch(self):
             )
             await MFPGUI().mfp.send(self.working_trigger_id, 0, 0)
             log.debug(f"[freewheel] done freewheeling")
+            self.app_window.hud_write("Done freewheeling")
 
     handler_id.append(MFPGUI().appwin.signal_listen("freewheel", fw_handler))
 
@@ -125,6 +126,7 @@ async def fx_apply_patch(self):
     await asyncio.sleep(0.1)
     await MFPGUI().mfp.send(self.working_trigger_id, 0, 1)
     log.debug(f"[freewheel] freewheeling for {self.buffer_info.size} frames")
+    self.app_window.hud_write("Freewheeling", spinner=[".", "..", "...", "...."])
     await MFPGUI().mfp.freewheel(self.working_patch_id, self.buffer_info.size)
 
 

@@ -430,6 +430,9 @@ class BufferEditor:
                         elif self.implot_limits_counter > 0:
                             self.implot_limits_counter -= 1
 
+                    if channel >= len(self.implot_limits_need_set):
+                        self.implot_limits_need_set.append(False)
+
                     # this is to reset limits after new file or change in view
                     if self.implot_limits_need_set[channel] or self.implot_limits_counter > 0:
                         implot.setup_axis_limits(

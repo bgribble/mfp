@@ -225,10 +225,12 @@ async def init_working_patch(self):
     if bpm is not None:
         channel_bpms = []
         for chan, value in enumerate(bpm):
-            channel_bpms.append(float(value[0]))
+            if isinstance(value, (list, tuple)):
+                value = value[0]
+            channel_bpms.append(float(value))
         channel_bpms.sort()
         self.set_buffer_bpm(channel_bpms[int(len(channel_bpms) / 2)])
-        self.app_window.hud_write(f"Setting buffer BPM to {self.buffer_bpm}")
+        self.app_window.hud_write(f"Setting buffer BPM to {self.buffer_bpm:.3f}")
         log.info(f"[buffer] Tempo is {self.buffer_bpm:.3f} BPM")
     else:
         self.app_window.hud_write("Cannot determine BPM")
