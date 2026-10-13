@@ -30,6 +30,7 @@ class RGBAColor(Serializable):
             blue=self.blue,
             alpha=self.alpha
         )
+
     def to_rgba(self):
         return (self.red, self.green, self.blue, self.alpha)
 
@@ -40,6 +41,10 @@ class RGBAColor(Serializable):
         return (
             (int(self.red) << 24) | (int(self.green) << 16) | (int(self.blue) << 8) | int(self.alpha)
         )
+
+    def copy(self):
+        return RGBAColor(red=self.red, green=self.green, blue=self.blue, alpha=self.alpha)
+
     def __str__(self):
         return f"{int(self.red):02x}{int(self.green):02x}{int(self.blue):02x}{int(self.alpha):02x}"
 

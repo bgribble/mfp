@@ -360,20 +360,18 @@ class LabelEditMode (InputMode):
     def select_left(self):
         orig_start = self.selection_start
         orig_end = self.selection_end
+        new_start = orig_start
+        new_end = orig_end
 
         new_editpos = max(self.editpos - 1, 0)
 
         if new_editpos < orig_start:
             new_start = new_editpos
-            new_end = orig_end
-        else:
-            new_start = orig_start
+        elif new_editpos > 0:
             new_end = orig_end - 1
 
         self.editpos = new_editpos
-        self.set_selection(
-            new_start, new_end
-        )
+        self.set_selection(new_start, new_end)
         return True
 
     def move_right(self):
@@ -384,20 +382,17 @@ class LabelEditMode (InputMode):
     def select_right(self):
         orig_start = self.selection_start
         orig_end = self.selection_end
-
+        new_start = orig_start
+        new_end = orig_end
         new_editpos = min(self.editpos + 1, len(self.text))
 
         if new_editpos > orig_end:
             new_end = new_editpos
-            new_start = orig_start
-        else:
-            new_end = orig_end
+        elif new_editpos < len(self.text):
             new_start = orig_start + 1
 
         self.editpos = new_editpos
-        self.set_selection(
-            new_start, new_end
-        )
+        self.set_selection(new_start, new_end)
         return True
 
     def _one_line_up(self, pos):

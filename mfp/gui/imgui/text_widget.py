@@ -60,6 +60,8 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
     backend_name = "imgui"
     blink_cursor = False
 
+    block_cursor_alpha = 0x60
+
     imgui_currently_rendering = None
     imgui_font_atlas = {}
     imgui_font_current = None
@@ -87,7 +89,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         self.cursor_pos = 0
         self.cursor_visible = False
         self.cursor_color = (
-            self.container.get_color("cursor-color")
+            self.container.get_color("text-cursor-color")
             or ColorDB().find('default-cursor-color')
         )
 
@@ -479,6 +481,10 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
         lines = label_text.split("\n")
         line_start_pos = 0
 
+        cursor_color = self.cursor_color.copy()
+        if self.selection_start != self.selection_end:
+            cursor_color.alpha = self.block_cursor_alpha
+
         for line in lines:
             line_end_pos = line_start_pos + len(line)
             if self.selection_start <= line_end_pos and self.selection_end >= line_start_pos:
@@ -493,7 +499,7 @@ class ImguiTextWidgetImpl(TextWidget, TextWidgetImpl):
                 draw_list.add_rect_filled(
                     (pos_x + box_start_px - 1, pos_y),
                     (pos_x + box_start_px + box_width_px + 1, pos_y + self.font_height + 2),
-                    ColorDB().backend.im_col32(self.cursor_color)
+                    ColorDB().backend.im_col32(cursor_color)
                 )
             line_start_pos += len(line) + 1
             pos_y += font_height

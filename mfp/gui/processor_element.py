@@ -58,7 +58,7 @@ class ProcessorElement (BaseElement):
 
         # these can't be initialized until there's a backend
         type(self).style_defaults.update({
-            'cursor-color': ColorDB().find('default-cursor-color'),
+            'text-cursor-color': ColorDB().find('default-cursor-color'),
         })
         self._all_styles = self.combine_styles()
 
