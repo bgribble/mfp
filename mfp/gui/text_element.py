@@ -94,6 +94,10 @@ class TextElement (BaseElement):
         self.label.set_color(self.get_color('text-element-text-color'))
         yield None
 
+    @saga('width', 'height')
+    async def size_changed(self, action, state_diff, previous):
+        yield self.send_params()
+
     async def update(self):
         pass
 
