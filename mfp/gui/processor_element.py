@@ -166,14 +166,14 @@ class ProcessorElement (BaseElement):
         if self.obj_args is None:
             if markup:
                 self.label.set_markup(
-                    f"<div class='tt color-{type_color}'>{self.obj_type}</div>"
+                    f"<div class='color-{type_color}'><tt>{self.obj_type}</tt></div>"
                 )
             else:
                 self.label.set_text(f"{self.obj_type}")
         else:
             if markup:
                 self.label.set_markup(
-                    f"<div class='tt'><div class='color-{type_color}'>{self.obj_type}</div> {self.obj_args}</div>"
+                    f"<div class='tt color-{type_color}'>{self.obj_type}</div><tt> {self.obj_args}</tt>"
                 )
             else:
                 self.label.set_text(f"{self.obj_type} {self.obj_args}")
