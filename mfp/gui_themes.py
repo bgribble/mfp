@@ -32,7 +32,7 @@ theme_dusk = {
         'default-operate-grid-color': trn(dusk_grue, 0x10),
         'default-stroke-color': dusk_gray_4,
         'default-stroke-color-selected': dusk_teal,
-        'default-stroke-color-hover': trn(dusk_teal, 0x90),
+        'default-stroke-color-hover': trn(dusk_gray_2, 0x60),
         'default-stroke-color-debug': (0x3f, 0xbf, 0x7f, 0xff),
         'default-selbox-stroke-color': dusk_blue,
         'default-selbox-fill-color': trn(dusk_teal, 0x50),
