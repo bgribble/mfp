@@ -29,6 +29,7 @@ BASE_MARKDOWN_FONT_SCALES = [
     1.42, 1.33, 1.24, 1.15, 1.1, 1.05
 ]
 
+
 def monospace_font():
     atlas = imgui.get_io().fonts
     fonts = atlas.fonts
@@ -36,6 +37,7 @@ def monospace_font():
         family = f.get_debug_name().split(' ')[0]
         if family == 'Inconsolata-Medium':
             return f
+
 
 class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
     backend_name = "imgui"
@@ -223,7 +225,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         imgui.get_style().scale_all_sizes(self.imgui_global_scale)
 
         last_scale = self.imgui_global_scale
-        last_net_scale = self.imgui_global_scale
 
         sync_time = None
         while (
@@ -647,11 +648,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         return True
 
     def rezoom(self, **kwargs):
-        patch = self.selected_patch
-        if 'previous' in kwargs:
-            prev_zoom = kwargs['previous']
-            curr_zoom = patch.display_info.view_zoom
-
         self.viewport_zoom_set = True
 
     def get_size(self):
@@ -692,7 +688,6 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
 
     #####################
     # autoplace
-
     def show_autoplace_marker(self, x, y):
         self.autoplace_x = x
         self.autoplace_y = y
