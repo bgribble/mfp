@@ -670,6 +670,9 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         self.viewport_pos_set = True
         return True
 
+    def close_menus(self):
+        imgui.internal.close_popup_to_level(0, True)
+
     #####################
     # element operations
     def register(self, element):

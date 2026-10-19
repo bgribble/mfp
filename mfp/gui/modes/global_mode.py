@@ -332,7 +332,13 @@ class GlobalMode (InputMode):
                 menupath="Window > ||||Magnification (DPI) > []250%",
                 selected=lambda: MFPGUI().appwin.imgui_global_scale == 2.5
             )
+            cls.bind(
+                "close-all-menus", cls.close_menus, "Close all open menus",
+                keysym="ESC"
+            )
 
+    async def close_menus(self):
+        self.window.close_menus()
 
     async def set_app_scale(self, new_scale):
         return self.window.set_app_scale(new_scale)

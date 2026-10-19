@@ -167,6 +167,8 @@ class PatchEditMode (InputMode):
         )
 
     async def control_mode(self):
+        if self.window.main_menu_open or self.window.bufedit_menu_open or self.window.context_menu_open:
+            return False
         await self.window.control_major_mode()
 
     def selection_changed_cb(self, window, signal, obj):
