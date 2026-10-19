@@ -289,7 +289,7 @@ class BufferEditor:
                         self.implot_playhead_start_pos + playhead_offset
                     )
 
-                if self.implot_playhead > self.implot_total_time:
+                if self.implot_playhead + self.buffer_origin > self.implot_total_time:
                     self.implot_playhead_start_time = None
                     self.implot_playhead_looping = False
                     MFPGUI().async_task(self.playhead_pause())
