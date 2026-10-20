@@ -667,7 +667,10 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         return True
 
     def close_menus(self):
-        imgui.internal.close_popup_to_level(0, True)
+        try:
+            imgui.internal.close_popup_to_level(0, True)
+        except Exception:
+            pass
 
     #####################
     # element operations
