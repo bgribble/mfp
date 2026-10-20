@@ -154,7 +154,8 @@ class ConnectionMode (InputMode):
             self.dest_obj = self.window.selected[0]
 
         if (self.source_obj and self.dest_obj
-            and self.connection.obj_state != BaseElement.OBJ_DELETED):
+            and self.connection and self.connection.obj_state != BaseElement.OBJ_DELETED
+        ):
             if await MFPGUI().mfp.connect(
                 self.source_obj.obj_id,
                 self.source_port,
