@@ -146,7 +146,7 @@ class ImguiTextElementImpl(TextElementImpl, ImguiBaseElementImpl, TextElement):
         ##########################
 
         nedit.pop_style_color(2)  # color
-        nedit.pop_style_var(2)
+        nedit.pop_style_var(3)
 
     def draw_ports(self):
         super().draw_ports()

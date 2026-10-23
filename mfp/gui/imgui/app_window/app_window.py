@@ -179,7 +179,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         )
 
     async def _render_task(self):
-        from mfp.gui.imgui.text_widget import ImguiTextWidgetImpl
+        from mfp.gui.imgui.text_widget import ImguiTextWidgetImpl, default_prop_font_size
 
         keep_going = True
         next_frame_latest_delay = 10000
@@ -198,7 +198,7 @@ class ImguiAppWindowImpl(AppWindow, AppWindowImpl):
         md_options.callbacks.on_html_div = ImguiTextWidgetImpl.markdown_div_callback
         md_options.callbacks.on_image = ImguiTextWidgetImpl.image_callback
         md_options.callbacks.on_open_link = ImguiTextWidgetImpl.url_callback
-        md_options.font_options.regular_size = 16 / self.imgui_global_scale
+        md_options.font_options.regular_size = default_prop_font_size / self.imgui_global_scale
 
         # md_options.font_options.size_diff_between_levels = 4
         # md_options.font_options.max_header_level = 5

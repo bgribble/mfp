@@ -16,7 +16,7 @@ from ..text_widget import TextWidget, TextWidgetImpl
 default_tt_font_name = "Inconsolata"
 default_tt_font_size = 15
 default_prop_font_name = "Roboto"
-default_prop_font_size = 16
+default_prop_font_size = 14
 
 # parse the get_debug_name() output to get shape and size info
 def _font_info(info):

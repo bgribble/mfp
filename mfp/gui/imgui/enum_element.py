@@ -119,7 +119,7 @@ class ImguiEnumElementImpl(EnumElementImpl, ImguiBaseElementImpl, EnumElement):
         ##########################
 
         imgui.pop_style_var()
-        nedit.pop_style_color()  # color
+        nedit.pop_style_color(2) # color
         nedit.pop_style_var(3)
 
     def draw_ports(self):
