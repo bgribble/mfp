@@ -17,6 +17,8 @@ from ..colordb import ColorDB
 from .app_window.menu_bar import load_menupaths, add_menu_items
 
 
+jump_logline = None
+
 class ImguiBaseElementImpl(BaseElementImpl):
     backend_name = "imgui"
 
@@ -234,8 +236,12 @@ class ImguiBaseElementImpl(BaseElementImpl):
         helper checks at the end of the render cycle and filters
         out suspicious node movement.
         """
+        global jump_logline
         if abs(candidate_x - self.position_x) > 5 or abs(candidate_y - self.position_y) > 5:
-            log.debug(f"[render] position jump: was {(self.position_x, self.position_y)} now {(candidate_x, candidate_y)}, ignoring move")
+            logline = f"[render] position jump: was {(self.position_x, self.position_y)} now {(candidate_x, candidate_y)}, ignoring move"
+            if jump_logline != logline:
+                jump_logline = logline
+                log.debug(logline)
         else:
             self.position_x = candidate_x
             self.position_y = candidate_y
