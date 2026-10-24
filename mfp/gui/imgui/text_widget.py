@@ -14,7 +14,7 @@ from ..text_widget import TextWidget, TextWidgetImpl
 
 # FIXME -- config
 default_tt_font_name = "Inconsolata"
-default_tt_font_size = 16
+default_tt_font_size = 18
 default_prop_font_name = "Roboto"
 default_prop_font_size = 14
 
