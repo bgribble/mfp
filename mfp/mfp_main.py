@@ -52,9 +52,8 @@ under certain conditions.  See the file COPYING for details.
 
 
 def version():
-    import pkg_resources
-    vers = pkg_resources.require("mfp")[0].version
-    return vers
+    from importlib.metadata import version
+    return version('mfp')
 
 
 def add_evaluator_defaults():
