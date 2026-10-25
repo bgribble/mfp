@@ -65,9 +65,19 @@ preview. These are all in the `master` branch.
   selection between matching items, or C-A-RET to select all
   matching.
 
-### BUILDING
 
-See README.build
+### BUILD/INSTALL
+
+MFP is Linux-only. You have two possibilities for installing:
+
+* There's a simple installer for the amd64 architecture. A
+  mostly-built binary package with the installer script is
+  downloadable on the Github release. See the file README.install
+  (in the downloaded archive) for instructions. Python
+  dependencies will be downloaded at install time.
+
+* Build from source. See README.build
+
 
 ### USAGE
 
