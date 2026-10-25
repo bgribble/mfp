@@ -5,10 +5,10 @@ If you want to quickly install MFP without building it yourself,
 and you happen to be using Linux on the x86_64 architecture,
 you are in luck.
 
-You will need to have Python 3.10 or higher available. If that's
-not your system Python, you will need to install a newer version
-somewhere (it doesn't have to be the system Python) and then use
-the new version to run the installer.
+You will need to have a Python version 3.10, 3.11, 3.12, or 3.13
+available. If that's not your system Python, you will need to
+install a newer version somewhere (it doesn't have to be the
+system Python) and then use the new version to run the installer.
 
 You will also need to have the Python "venv" package available.
 It's part of the standard Python library, but some distributions
