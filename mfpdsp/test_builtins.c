@@ -351,7 +351,6 @@ test_osc_1(void * data)
 
 }
 
-
 typedef struct {
     char shm_id[64];
     int  shm_fd;
@@ -367,6 +366,7 @@ typedef struct {
 typedef struct {
     buf_info buf_active;
     buf_info buf_to_alloc;
+    int buf_alloc_waiting;
 
     mfp_sample * buf_base;
     int chan_count;
@@ -374,6 +374,7 @@ typedef struct {
 
     /* trigger settings (for TRIG_THRESH, TRIG_EXT modes */
     int trig_message;
+    int trig_pos_set;
     int trig_triggered_samples;
     int trig_xfade_samples;
     int trig_channel;
@@ -385,16 +386,22 @@ typedef struct {
     /* record settings */
     int play_channels;
     int rec_channels;
+    int monitor_channels;
     int rec_enabled;
+    int rec_latency_comp;
+    int rec_overdub;
 
     /* region definition (for LOOP modes, set by REC_LOOPSET) */
     int region_start;
     int region_end;
 
-    int buf_pos;
+    int buf_read_pos;
+    int buf_write_pos;
     int buf_xfade_pos;
     int buf_mode;
     int buf_state;
+    int buf_state_start_block;
+    int buf_state_start_pos;
 
 } builtin_buffer_data;
 
@@ -442,7 +449,9 @@ test_buffer_2(void * data)
     setparam_double(b, "trig_channel", 0.0);
     setparam_double(b, "trig_thresh", 2.0);
     setparam_double(b, "channels", 1.0);
+    setparam_double(b, "realloc", 1.0);
     setparam_double(b, "size", ((mfp_context *)data)->blocksize);
+    b->needs_config = 1;
 
     mfp_proc_connect(line, 0, b, 0);
 

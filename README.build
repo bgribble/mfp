@@ -184,7 +184,9 @@ There are some tests, though not as many as I would like.  What's
 there basically comes in two flavors, all of which can be run
 with various incantations of the `nosetests` test runner:
 
- * Python test cases in mfp/test: run with plain `nosetests -v mfp/test/`
+ * Python test cases in mfp/test: run with plain `nosetests -v mfp/test/`. You 
+   will need the installed `${PREFIX}/lib` in your `LD_LIBRARY_PATH` 
+   environment variable.
 
  * C test cases in mfpdsp/test_*: run with the `testext` plugin
    to nosetests, `nosetests -v --with-testext --exe wafbuild/libmfpdsp.so`
@@ -200,4 +202,4 @@ with current Python versions, and the "new" version of nosetests
 --exe option needed to point nose to the libmfpdsp.so file. So I
 switched over to "pynose", which is a fork of the original
 nosetests, just updated to work with contemporary Python. It gets
-installed by install_deps.
+installed automatically.
