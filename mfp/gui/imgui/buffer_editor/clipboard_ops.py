@@ -25,7 +25,7 @@ async def clipboard_copy(self):
         return
 
     clip_start = int(self.position_to_sample(self.implot_selection.x.min))
-    clip_size = int(self.position_to_sample(self.implot_selection.x.max - self.implot_selection.x.min))
+    clip_size = int(self.position_to_sample(self.implot_selection.x.max)) - clip_start
     clip_data = [
         chan[clip_start:clip_start+clip_size].copy()
         for chan in self.buffer_data
@@ -38,15 +38,24 @@ async def clipboard_copy(self):
 
 @extends(BufferEditor)
 async def clipboard_cut(self):
-    if not self.buffer_data or not self.clipboard_pos:
+    if not self.buffer_data or self.implot_selection is None:
         return
 
+    orig_samples = len(self.buffer_data[0])
     await self.clipboard_copy()
 
     self.buffer_data = [
         np.delete(chan, np.s_[self.clipboard_pos:self.clipboard_pos + self.clipboard_size])
         for chan in self.buffer_data
     ]
+
+    if self.buffer_origin is not None:
+        region_start = self.sample_to_position(self.clipboard_pos, origin=0)
+        region_end = self.sample_to_position(self.clipboard_pos + self.clipboard_size, origin=0)
+        if region_start < self.buffer_origin < region_end:
+            self.buffer_origin = region_start
+        elif region_end < self.buffer_origin:
+            self.buffer_origin -= (region_end - region_start)
 
     bufsize = len(self.buffer_data[0]) / (self.buffer_info.rate / 1000.0)
 
@@ -75,7 +84,6 @@ async def clipboard_cut(self):
     self.buffer_compute_peaks()
     self.implot_selection = None
 
-
 @extends(BufferEditor)
 async def clipboard_clear(self):
     if not self.buffer_data or not self.implot_selection:
@@ -103,6 +111,14 @@ async def clipboard_delete(self):
         np.delete(chan, np.s_[section_start:section_end])
         for chan in self.buffer_data
     ]
+
+    if self.buffer_origin is not None:
+        region_start = self.implot_selection.x.min
+        region_end = self.implot_selection.x.max
+        if region_start < self.buffer_origin < region_end:
+            self.buffer_origin = region_start
+        elif region_end < self.buffer_origin:
+            self.buffer_origin -= (region_end - region_start)
 
     self.buffer_sync(None, None, self.working_buf_obj, self.working_buf_info)
     self.buffer_compute_peaks()
@@ -144,7 +160,7 @@ async def clipboard_paste(self):
         sel_size = 0
     else:
         sel_start = int(self.position_to_sample(self.implot_selection.x.min))
-        sel_size = int(self.position_to_sample(self.implot_selection.x.max - self.implot_selection.x.min))
+        sel_size = int(self.position_to_sample(self.implot_selection.x.max)) - sel_start
 
     delta_len = clip_size - sel_size
 
@@ -209,7 +225,7 @@ async def clipboard_paste__mixing(self):
         sel_size = 0
     else:
         sel_start = int(self.position_to_sample(self.implot_selection.x.min))
-        sel_size = int(self.position_to_sample(self.implot_selection.x.max - self.implot_selection.x.min))
+        sel_size = int(self.position_to_sample(self.implot_selection.x.max)) - sel_start
 
     delta_len = sel_start + clip_size - len(self.buffer_data[0])
 
