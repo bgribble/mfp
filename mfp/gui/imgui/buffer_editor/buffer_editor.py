@@ -299,7 +299,7 @@ class BufferEditor:
             limit_delay_frames = 2
 
             for channel in range(num_channels):
-                channel_tool_width = 100
+                channel_tool_width = 50 + 40 * self.app_window.imgui_global_scale
 
                 imgui.push_id(str(channel))
                 chan_size = self.channel_options[channel].get("size", "normal")
