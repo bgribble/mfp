@@ -18,7 +18,7 @@ pydantic==2.13.4
 pydantic_core==2.46.4
 pyliblo3==0.16.4
 pyloudnorm==0.2.0
-pynose==1.5.4
+pynose==1.5.5
 PyOpenGL==3.1.9
 PySDL2==0.9.17
 python-dateutil==2.9.0.post0
