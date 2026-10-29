@@ -111,7 +111,7 @@ async def fx_apply_patch(self):
         if status == 0:
             MFPGUI().appwin.signal_unlisten(handler_id[0])
             self.buffer_grab(
-                self.working_buf_obj, self.working_buf_info, self.working_buf_info.channels-2
+                self.working_buf_obj, self.working_buf_info, self.working_buf_info.channels-3
             )
             await MFPGUI().mfp.send(self.working_trigger_id, 0, 0)
             log.debug(f"[freewheel] done freewheeling")

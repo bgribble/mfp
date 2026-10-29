@@ -674,7 +674,7 @@ class BufferEditor:
             now = datetime.now()
             if (now - self.buffer_data_last_update).total_seconds() > 1:
                 self.buffer_grab(
-                    self.working_buf_obj, self.working_buf_info, self.working_buf_info.channels-2
+                    self.working_buf_obj, self.working_buf_info, self.working_buf_info.channels-3
                 )
 
         imgui.pop_style_var(3)

@@ -47,8 +47,9 @@ async def init_working_patch(self):
     if self.working_patch_id:
         await self.close_working_patch()
 
+    init_channels = self.buffer_info.channels
     audio_channels = sum(
-        1 << c for c in range(self.buffer_info.channels)
+        1 << c for c in range(init_channels)
     )
 
     self.working_patch_id = await MFPGUI().mfp.open_file(
@@ -61,8 +62,8 @@ async def init_working_patch(self):
     )
     buffer_params = dict(
         buf_mode=7,
-        channels=self.buffer_info.channels + 3,
-        trig_chan=self.buffer_info.channels,
+        channels=init_channels + 3,
+        trig_chan=init_channels,
         size_frames=self.buffer_info.size,
         gui_notify=True,
     )
