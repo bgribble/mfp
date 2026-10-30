@@ -45,7 +45,7 @@ async def clipboard_cut(self):
     await self.clipboard_copy()
 
     self.buffer_data = [
-        np.delete(chan, np.s_[self.clipboard_pos:self.clipboard_pos + self.clipboard_size])
+        np.delete(chan, np.s_[self.clipboard_pos:self.clipboard_pos + self.clipboard_size]).copy()
         for chan in self.buffer_data
     ]
 
@@ -63,7 +63,7 @@ async def clipboard_cut(self):
     working_buf = await self.buffer_reshape(
         self.working_source_id,
         size=bufsize,
-        channels=len(self.buffer_data) + 2
+        channels=len(self.buffer_data) + 3
     )
     self.working_buf_id = working_buf.buf_id
     self.working_buf_obj = SharedMemory(self.working_buf_id)
@@ -78,7 +78,7 @@ async def clipboard_cut(self):
             self.working_sink_id,
             buf_id=working_buf.buf_id,
             size=bufsize,
-            channels=working_buf.channels
+            channels=len(self.buffer_data) + 3
         )
 
     self.buffer_compute_peaks()
@@ -108,9 +108,10 @@ async def clipboard_delete(self):
     section_end = int(self.position_to_sample(self.implot_selection.x.max))
 
     self.buffer_data = [
-        np.delete(chan, np.s_[section_start:section_end])
+        np.delete(chan, np.s_[section_start:section_end]).copy()
         for chan in self.buffer_data
     ]
+    buffer_chans = len(self.buffer_data)
 
     if self.buffer_origin is not None:
         region_start = self.implot_selection.x.min
@@ -120,16 +121,13 @@ async def clipboard_delete(self):
         elif region_end < self.buffer_origin:
             self.buffer_origin -= (region_end - region_start)
 
-    self.buffer_sync(None, None, self.working_buf_obj, self.working_buf_info)
-    self.buffer_compute_peaks()
-
     bufsize = len(self.buffer_data[0]) / (self.buffer_info.rate / 1000.0)
 
     # source buffer "owns" the reshape
     working_buf = await self.buffer_reshape(
         self.working_source_id,
         size=bufsize,
-        channels=len(self.buffer_data) + 2
+        channels=buffer_chans + 3
     )
     self.working_buf_id = working_buf.buf_id
     self.working_buf_obj = SharedMemory(self.working_buf_id)
@@ -142,9 +140,11 @@ async def clipboard_delete(self):
             self.working_sink_id,
             buf_id=working_buf.buf_id,
             size=bufsize,
-            channels=working_buf.channels
+            channels=buffer_chans + 3
         )
 
+    self.buffer_sync(None, None, self.working_buf_obj, self.working_buf_info)
+    self.buffer_compute_peaks()
     self.implot_selection = None
 
 
@@ -166,12 +166,12 @@ async def clipboard_paste(self):
 
     if delta_len > 0:
         self.buffer_data = [
-            np.insert(chan, sel_start, np.zeros(delta_len))
+            np.insert(chan, sel_start, np.zeros(delta_len)).copy()
             for chan in self.buffer_data
         ]
     elif delta_len < 0:
         self.buffer_data = [
-            np.delete(chan, np.s_[sel_start:sel_start - delta_len])
+            np.delete(chan, np.s_[sel_start:sel_start - delta_len]).copy()
             for chan in self.buffer_data
         ]
 
@@ -182,7 +182,7 @@ async def clipboard_paste(self):
         working_buf = await self.buffer_reshape(
             self.working_source_id,
             size=bufsize,
-            channels=len(self.buffer_data) + 2
+            channels=len(self.buffer_data) + 3
         )
         self.working_buf_id = working_buf.buf_id
         self.working_buf_obj = SharedMemory(self.working_buf_id)
@@ -195,7 +195,7 @@ async def clipboard_paste(self):
                 self.working_sink_id,
                 buf_id=working_buf.buf_id,
                 size=bufsize,
-                channels=working_buf.channels
+                channels=len(self.buffer_data) + 3
             )
 
         self.implot_selection = None
@@ -232,7 +232,7 @@ async def clipboard_paste__mixing(self):
     # make room at end if needed
     if delta_len > 0:
         self.buffer_data = [
-            np.append(chan, np.zeros(delta_len))
+            np.append(chan, np.zeros(delta_len)).copy()
             for chan in self.buffer_data
         ]
 
@@ -262,7 +262,7 @@ async def clipboard_paste__mixing(self):
         working_buf = await self.buffer_reshape(
             self.working_source_id,
             size=bufsize_ms,
-            channels=len(self.buffer_data) + 2
+            channels=len(self.buffer_data) + 3
         )
         self.working_buf_id = working_buf.buf_id
         self.working_buf_obj = SharedMemory(self.working_buf_id)
@@ -275,7 +275,7 @@ async def clipboard_paste__mixing(self):
                 self.working_sink_id,
                 buf_id=working_buf.buf_id,
                 size=bufsize_ms,
-                channels=working_buf.channels
+                channels=len(self.buffer_data) + 3
             )
 
         self.implot_selection = None

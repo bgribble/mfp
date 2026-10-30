@@ -164,7 +164,7 @@ async def buffer_trim_to_selection(self):
     working_buf = await self.buffer_reshape(
         self.working_source_id,
         size=bufsize,
-        channels=len(self.buffer_data) + 2
+        channels=len(self.buffer_data) + 3
     )
     self.working_buf_id = working_buf.buf_id
     self.working_buf_obj = SharedMemory(self.working_buf_id)
@@ -177,7 +177,7 @@ async def buffer_trim_to_selection(self):
             self.working_sink_id,
             buf_id=working_buf.buf_id,
             size=bufsize,
-            channels=working_buf.channels
+            channels=len(self.buffer_data) + 3
         )
 
     self.buffer_sync(None, None, self.working_buf_obj, self.working_buf_info)
@@ -233,7 +233,7 @@ async def buffer_change_tempo(self, ratio, method):
     working_buf = await self.buffer_reshape(
         self.working_source_id,
         size=bufsize,
-        channels=len(self.buffer_data) + 2
+        channels=len(self.buffer_data) + 3
     )
     self.working_buf_id = working_buf.buf_id
     self.working_buf_obj = SharedMemory(self.working_buf_id)
@@ -246,7 +246,7 @@ async def buffer_change_tempo(self, ratio, method):
             self.working_sink_id,
             buf_id=working_buf.buf_id,
             size=bufsize,
-            channels=working_buf.channels
+            channels=len(self.buffer_data) + 3
         )
 
     await self.playhead_set_selection(

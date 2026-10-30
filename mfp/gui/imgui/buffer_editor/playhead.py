@@ -223,11 +223,11 @@ async def playhead_select_silence(self, thresh_db):
     ph = int(self.position_to_sample(self.implot_playhead))
 
     pos_fwd = ph
-    while pos_fwd < self.buffer_info.size and level(pos_fwd) <= thresh_db:
+    while pos_fwd < self.buffer_info.size-1 and level(pos_fwd) <= thresh_db:
         pos_fwd += 1
 
     pos_rev = ph
-    while pos_rev >= 0 and level(pos_rev) <= thresh_db:
+    while pos_rev > 0 and level(pos_rev) <= thresh_db:
         pos_rev -= 1
 
     await self.playhead_set_selection(
@@ -254,7 +254,7 @@ async def playhead_insert_data(self, data):
     working_buf = await self.buffer_reshape(
         self.working_source_id,
         size=bufsize,
-        channels=len(self.buffer_data) + 2
+        channels=len(self.buffer_data) + 3
     )
     self.working_buf_id = working_buf.buf_id
     self.working_buf_obj = SharedMemory(self.working_buf_id)
@@ -267,7 +267,7 @@ async def playhead_insert_data(self, data):
             self.working_sink_id,
             buf_id=working_buf.buf_id,
             size=bufsize,
-            channels=working_buf.channels
+            channels=len(self.buffer_data) + 3
         )
 
     self.buffer_sync(None, None, self.working_buf_obj, self.working_buf_info)

@@ -95,7 +95,7 @@ async def init_working_patch(self):
             await MFPGUI().mfp.connect(src_id, src_port, self.working_source_id, port_num)
 
     buffer_params["buf_id"] = source_buf.buf_id
-    buffer_params["channels"] = source_buf.channels + 1
+    buffer_params["channels"] = source_buf.channels
     buffer_params["size_frames"] = source_buf.size
     buffer_params["monitor_channels"] = audio_channels
 
