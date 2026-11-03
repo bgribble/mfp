@@ -48,6 +48,14 @@ def render_bufedit_menu(app_window):
 
     imgui.push_style_var(imgui.StyleVar_.window_padding, (8, 8))
     imgui.push_style_var(imgui.StyleVar_.item_spacing, (0, 3))
+    cur_x, cur_y = imgui.get_cursor_pos()
+    width_remain = app_window.window_width - cur_x
+    height_remain = app_window.window_width - cur_y
+
+    imgui.set_next_window_size_constraints(
+        (0,0),
+        (width_remain, height_remain)
+    )
     if imgui.begin_popup("##bufedit_popup"):
         app_window.bufedit_menu_open = True
         imgui.begin_group()
@@ -92,9 +100,13 @@ def render_bufedit_menu(app_window):
 
         imgui.end_group()
         content_size = imgui.get_item_rect_size()
+        menu_y_off = 0
+        if content_size[1] + 32 > app_window.console_panel_height:
+            menu_y_off = content_size[1] + 32 - app_window.console_panel_height
+
         imgui.set_window_pos((
            app_window.window_width - content_size[0] - 32,
-           app_window.window_height - app_window.console_panel_height
+           app_window.window_height - app_window.console_panel_height - menu_y_off
         ))
 
         imgui.end_popup()
