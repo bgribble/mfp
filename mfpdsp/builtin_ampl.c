@@ -82,6 +82,14 @@ process_ampl(mfp_processor * proc)
             pdata->rms_pointer = 0;
         }
 
+        if (isnan(peak)) {
+            mfp_log_debug("[ampl] peak NaN: sample=%f peak_slope=%f peak=%f\n", sample, peak_slope, peak);
+            peak = 0.0;
+        }
+        if (isnan(rms_accum)) {
+            mfp_log_debug("[ampl] accum NaN: sample=%f sqr_sample=%f rms_accum=%f\n", sample, sqr_sample, rms_accum); 
+            rms_accum = 0.0;
+        }
     }
 
     /* save state */
